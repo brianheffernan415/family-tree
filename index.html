@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Heffernan Family Tree</title>
+  <!-- No external CSS dependencies -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f5f0eb;--card:#ffffff;--primary:#5a3e2b;
+      --accent:#a0784a;--accent2:#d4a76a;--text:#2c1a0e;
+      --muted:#7a6452;--border:#ddd0c0;--danger:#c0392b;
+      --research:#3a6b52;--gold:#c49a1a;--radius:10px;
+      --shadow:0 2px 12px rgba(0,0,0,.10);--bnav:0px;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* Header */
+    header{background:var(--primary);color:#fff;padding:0 14px;display:flex;align-items:center;justify-content:space-between;height:54px;box-shadow:0 2px 8px rgba(0,0,0,.25);position:sticky;top:0;z-index:100;gap:8px}
+    header h1{font-size:1.05rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+    header h1 span{color:var(--accent2)}
+    nav.top-nav{display:flex;gap:5px;flex-shrink:0}
+    nav.top-nav button{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:5px 12px;font-size:.8rem;cursor:pointer;transition:background .15s;white-space:nowrap}
+    nav.top-nav button:hover,nav.top-nav button.active{background:var(--accent);border-color:var(--accent)}
+    .hdr-actions{display:flex;gap:4px;flex-shrink:0}
+    .btn-h{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:5px 8px;font-size:.73rem;cursor:pointer;white-space:nowrap}
+    .btn-h:hover{background:rgba(255,255,255,.22)}
+    .btn-publish{background:var(--accent2)!important;color:var(--primary)!important;font-weight:700;border-color:var(--accent2)!important}
+
+    /* Mobile bottom nav */
+    .bnav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--primary);z-index:150;border-top:2px solid rgba(255,255,255,.15);height:58px}
+    .bnav-inner{display:flex;height:100%}
+    .bnav-inner button{flex:1;background:transparent;color:rgba(255,255,255,.7);border:none;font-size:.62rem;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 0;transition:color .15s}
+    .bnav-inner .icon{font-size:1.25rem;line-height:1}
+    .bnav-inner button.active,.bnav-inner button:hover{color:var(--accent2)}
+
+    /* Main */
+    main{max-width:1200px;margin:0 auto;padding:18px 14px;padding-bottom:calc(18px + var(--bnav))}
+
+    /* Chips */
+    .fchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+    .fchip{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:4px 13px;font-size:.77rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+    .fchip:hover{border-color:var(--accent);color:var(--accent)}
+    .fchip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:7px;margin-bottom:13px;flex-wrap:wrap}
+    .search-box{flex:1;min-width:110px;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:.86rem;background:var(--card);color:var(--text);outline:none}
+    .search-box:focus{border-color:var(--accent)}
+    select.fsel{padding:7px 7px;border:1.5px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--card);color:var(--text);cursor:pointer}
+    .btn-add{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:8px 14px;font-size:.86rem;font-weight:600;cursor:pointer;white-space:nowrap}
+    .btn-add:hover{background:var(--accent)}
+
+    /* Section title */
+    .sec-title{font-size:1rem;font-weight:700;color:var(--primary);margin-bottom:13px;display:flex;align-items:center;gap:8px}
+    .sec-title .cnt{background:var(--accent2);color:var(--primary);border-radius:20px;padding:2px 10px;font-size:.73rem;font-weight:700}
+
+    /* Cards */
+    .people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:11px}
+    .pcard{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1.5px solid var(--border);padding:15px 13px 11px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;gap:4px}
+    .pcard:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.13)}
+    .pcard:active{transform:translateY(0)}
+    .pcard.research{border-color:#b0d4c0;background:#f8fdf9}
+    .pavatar{width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;font-size:1.05rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:3px;flex-shrink:0}
+    .pavatar.female{background:#8b5e8b}
+    .pavatar.unknown{background:#7a8a9a}
+    .pname{font-weight:700;font-size:.87rem;color:var(--text);line-height:1.3}
+    .pdates{font-size:.73rem;color:var(--muted)}
+    .ptag{display:inline-block;font-size:.66rem;padding:2px 7px;border-radius:10px;background:#eee6da;color:var(--muted);margin-top:1px}
+    .ptag.r{background:#d4ede0;color:var(--research)}
+
+    /* Modal */
+    .moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:200;overflow-y:auto}
+    .moverlay.open{display:block}
+    .modal{background:var(--card);margin:18px auto;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.22);width:calc(100vw - 28px);max-width:820px;padding:20px 22px 24px}
+    .modal h2{font-size:1.08rem;font-weight:700;color:var(--primary);margin-bottom:16px}
+    .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .fg{display:flex;flex-direction:column;gap:4px}
+    .fg.full{grid-column:1/-1}
+    .fsec{grid-column:1/-1;font-size:.76rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:7px}
+    label{font-size:.74rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    input,select,textarea{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.85rem;background:var(--bg);color:var(--text);font-family:inherit;outline:none;transition:border-color .15s;width:100%}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);background:#fff}
+    textarea{resize:vertical;min-height:58px}
+    .rcheck{display:flex;align-items:center;gap:10px;padding:8px 11px;background:#f0faf5;border:1.5px solid #b0d4c0;border-radius:8px;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--research);text-transform:none;letter-spacing:0}
+    .rcheck input[type=checkbox]{width:15px;height:15px;padding:0;border:none;background:none;cursor:pointer;accent-color:var(--research);flex-shrink:0}
+    .fact{display:flex;gap:7px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap}
+    .btn-save{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:.86rem;font-weight:700;cursor:pointer}
+    .btn-save:hover{background:var(--accent)}
+    .btn-cancel{background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;padding:8px 15px;font-size:.86rem;cursor:pointer}
+    .btn-cancel:hover{background:var(--bg)}
+    .btn-del{background:transparent;color:var(--danger);border:1.5px solid var(--danger);border-radius:8px;padding:8px 12px;font-size:.86rem;cursor:pointer;margin-right:auto}
+    .btn-del:hover{background:#fdf0ee}
+
+    /* Photo form */
+    .pfrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
+    .pfrow input[type=text]{flex:1;min-width:100px}
+    .btn-sm{background:var(--card);border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:.78rem;cursor:pointer;white-space:nowrap;color:var(--text);flex-shrink:0}
+    .btn-sm:hover{border-color:var(--accent)}
+    .pthumbs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+    .pthumb{position:relative}
+    .pthumb img{width:64px;height:50px;object-fit:cover;border-radius:5px;border:1.5px solid var(--border);display:block}
+    .pthumb button{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:var(--danger);color:#fff;border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+    /* Detail */
+    .dcard{background:var(--card);border-radius:14px;box-shadow:var(--shadow);border:1.5px solid var(--border);padding:18px;max-width:680px}
+    .dhdr{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+    .davatar{width:60px;height:60px;border-radius:50%;background:var(--accent);color:#fff;font-size:1.4rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .davatar.female{background:#8b5e8b}
+    .dname{font-size:1.25rem;font-weight:700}
+    .dsub{color:var(--muted);margin-top:2px;font-size:.86rem}
+    .rbanner{background:#e8f7ee;border:1px solid #b0d4c0;border-radius:8px;padding:6px 11px;font-size:.8rem;color:var(--research);font-weight:600;margin-bottom:13px}
+    .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+    .dfield label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+    .dfield p{font-size:.88rem;margin-top:2px}
+    .dsec{margin-bottom:12px}
+    .dsec-title{font-size:.74rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .dnotes{background:var(--bg);border-radius:8px;padding:10px;font-size:.85rem;line-height:1.6;color:var(--muted)}
+    .dact{display:flex;gap:7px;margin-top:16px;flex-wrap:wrap}
+    .btn-back{background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;padding:7px 13px;font-size:.84rem;cursor:pointer}
+    .btn-back:hover{background:var(--bg)}
+    .btn-edit{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:7px 15px;font-size:.84rem;font-weight:700;cursor:pointer}
+    .btn-edit:hover{background:var(--accent)}
+
+    /* Rel chips */
+    .rchips{display:flex;flex-wrap:wrap;gap:6px}
+    .rchip{background:#eee6da;border-radius:20px;padding:4px 11px;font-size:.78rem;color:var(--primary);cursor:pointer;border:1.5px solid transparent;transition:border-color .15s}
+    .rchip:hover{border-color:var(--accent)}
+    .rchip.dl{background:#fff3cd;border-color:var(--gold);color:#7a5a00;font-weight:700}
+
+    /* Photo gallery */
+    .pgallery{display:flex;flex-wrap:wrap;gap:9px;margin-top:5px}
+    .pgitem{display:flex;flex-direction:column;align-items:center;gap:3px}
+    .pgitem img{width:100px;height:80px;object-fit:cover;border-radius:7px;cursor:pointer;border:2px solid var(--border);transition:border-color .15s}
+    .pgitem img:hover{border-color:var(--accent)}
+    .pgcap{font-size:.68rem;color:var(--muted);text-align:center;max-width:100px;line-height:1.3}
+
+    /* Lightbox */
+    .lbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;align-items:center;justify-content:center;flex-direction:column;padding:14px}
+    .lbox.open{display:flex}
+    .lbox img{max-width:92vw;max-height:76vh;border-radius:6px;object-fit:contain}
+    .lbox-cap{color:#f0e8d8;margin-top:10px;font-size:.9rem;text-align:center;max-width:540px}
+    .lbox-x{position:absolute;top:12px;right:18px;color:#fff;font-size:1.9rem;cursor:pointer;background:none;border:none;opacity:.8}
+    .lbox-x:hover{opacity:1}
+
+    /* Tree */
+    .tree-wrap{overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:14px;border:1px solid var(--border);border-radius:var(--radius);background:#faf7f3}
+    .ttip{color:var(--muted);font-size:.78rem;margin-bottom:11px;line-height:1.5}
+
+    /* Ancestor list */
+    .alist-gen{margin-bottom:16px}
+    .alist-glabel{font-size:.73rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;padding:3px 0;border-bottom:1px solid var(--border);margin-bottom:7px}
+    .alist-p{display:flex;align-items:center;gap:9px;padding:7px 9px;background:var(--card);border-radius:8px;border:1.5px solid var(--border);margin-bottom:5px;cursor:pointer;transition:border-color .12s}
+    .alist-p:hover{border-color:var(--accent)}
+    .alist-p.dl{border-color:var(--gold);background:#fffdf0}
+    .alist-av{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .alist-av.female{background:#8b5e8b}
+    .alist-info{flex:1;min-width:0}
+    .alist-name{font-weight:700;font-size:.86rem}
+    .alist-dates{font-size:.71rem;color:var(--muted)}
+
+    /* Map */
+    #map-wrap{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);background:#a8cfe0;user-select:none;aspect-ratio:2/1}
+    #map-wrap img.world-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;display:block}
+    #map-wrap svg.dot-layer{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+    #map-wrap svg.dot-layer circle{cursor:pointer;transition:r .1s}
+    #map-wrap svg.dot-layer circle:hover{r:9}
+    .map-tip{font-size:.78rem;color:var(--muted);margin-bottom:9px;line-height:1.5}
+    .gcstatus{font-size:.74rem;color:var(--muted);margin-top:7px;min-height:16px}
+    .map-popup{position:fixed;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;box-shadow:0 4px 20px rgba(0,0,0,.18);font-size:.86rem;max-width:240px;z-index:500;line-height:1.5;display:none}
+    .map-popup strong{display:block;margin-bottom:2px;font-size:.9rem}
+    .map-popup .mp-loc{color:var(--muted);font-size:.78rem}
+    .map-popup .mp-dates{font-size:.78rem;color:var(--muted)}
+    .mpbtn{background:var(--primary);color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:.76rem;cursor:pointer;margin-top:6px}
+    .map-popup .mp-close{float:right;background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);line-height:1;margin-left:8px}
+
+    /* Views */
+    .view{display:none}.view.active{display:block}
+    .empty{text-align:center;padding:36px 20px;color:var(--muted);grid-column:1/-1}
+    .empty .eicon{font-size:2rem;margin-bottom:9px}
+
+    /* Responsive */
+    @media(max-width:680px){
+      :root{--bnav:58px}
+      .bnav{display:block}
+      nav.top-nav{display:none}
+      .fgrid{grid-template-columns:1fr}
+      .fg.full{grid-column:1}
+      .fsec{grid-column:1}
+      .dgrid{grid-template-columns:1fr}
+      .people-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+      .modal{margin:0;border-radius:0;width:100vw;min-height:100dvh;padding:16px 14px 80px}
+      .moverlay{padding:0}
+      /* map image is naturally responsive */
+      .fchips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+      .fchips::-webkit-scrollbar{display:none}
+    }
+    @media(max-width:400px){
+      header h1{font-size:.88rem}
+      .people-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌳 Heffernan <span>Family Tree</span></h1>
+  <nav class="top-nav">
+    <button class="active" onclick="showView('people')">People</button>
+    <button onclick="showView('tree')">Tree</button>
+    <button onclick="showView('map')">Map</button>
+  </nav>
+  <div class="hdr-actions">
+    <button class="btn-h btn-publish" onclick="downloadUpdatedSite()" title="Bake your data in and drag to Netlify">🚀 Publish</button>
+    <button class="btn-h" onclick="exportData()">⬇ Export</button>
+    <label class="btn-h" style="cursor:pointer">⬆ Import<input type="file" accept=".json" style="display:none" onchange="importData(event)"/></label>
+  </div>
+</header>
+
+<nav class="bnav">
+  <div class="bnav-inner">
+    <button class="active" id="bnav-people" onclick="showView('people')"><span class="icon">👥</span>People</button>
+    <button id="bnav-tree" onclick="showView('tree')"><span class="icon">🌳</span>Tree</button>
+    <button id="bnav-map" onclick="showView('map')"><span class="icon">🗺️</span>Map</button>
+    <button onclick="openAddModal()" style="color:var(--accent2)"><span class="icon">＋</span>Add</button>
+  </div>
+</nav>
+
+<main>
+  <!-- PEOPLE -->
+  <div id="view-people" class="view active">
+    <div class="fchips" id="fchips"></div>
+    <div class="toolbar">
+      <input class="search-box" id="search" type="text" placeholder="Search by name…" oninput="renderPeople()"/>
+      <select class="fsel" id="filter-gen" onchange="renderPeople()"><option value="">All generations</option></select>
+      <select class="fsel" id="filter-res" onchange="renderPeople()">
+        <option value="">All people</option>
+        <option value="main">Main tree</option>
+        <option value="research">Research</option>
+      </select>
+      <button class="btn-add" onclick="openAddModal()">＋ Add</button>
+    </div>
+    <div class="sec-title">People <span class="cnt" id="pcnt">0</span></div>
+    <div class="people-grid" id="people-grid"></div>
+  </div>
+
+  <!-- DETAIL -->
+  <div id="view-detail" class="view">
+    <div class="dcard" id="dcard"></div>
+  </div>
+
+  <!-- TREE -->
+  <div id="view-tree" class="view">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap">
+      <div class="sec-title" style="margin-bottom:0">Family Tree</div>
+      <select class="fsel" id="tree-res" onchange="renderTree()">
+        <option value="">All people</option>
+        <option value="main">Main tree only</option>
+        <option value="research">Research only</option>
+      </select>
+      <button class="btn-sm" id="tmode-btn" onclick="toggleTreeMode()">📋 List View</button>
+    </div>
+    <p class="ttip">Brian is on the left — ancestors branch right. ★ = Brian's direct line. Scroll to explore. On mobile, tap "List View" for easier reading.</p>
+    <div class="tree-wrap" id="tree-chart-wrap"><div id="tree-svg"></div></div>
+    <div id="tree-list" style="display:none"></div>
+  </div>
+
+  <!-- MAP -->
+  <div id="view-map" class="view">
+    <div class="sec-title">Birthplace Map</div>
+    <p class="map-tip">Gold = Brian's direct ancestors · Brown = others · Green = research. Tap a dot to view the profile.</p>
+    <div id="map-wrap">
+      <img class="world-bg" src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" alt="World map" draggable="false" />
+      <svg class="dot-layer" id="dot-layer" viewBox="0 0 2560 1280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="gcstatus" id="gcstatus"></div>
+  </div>
+  <div class="map-popup" id="map-popup">
+    <button class="mp-close" onclick="document.getElementById('map-popup').style.display='none'">✕</button>
+    <strong id="mp-name"></strong>
+    <div class="mp-loc" id="mp-loc"></div>
+    <div class="mp-dates" id="mp-dates"></div>
+    <br><button class="mpbtn" id="mp-view">View Profile →</button>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="moverlay" id="moverlay" onclick="closeModalOut(event)">
+  <div class="modal">
+    <h2 id="modal-title">Add Person</h2>
+    <div class="fgrid">
+      <div class="fsec">Identity</div>
+      <div class="fg"><label>First Name *</label><input id="f-first" type="text" placeholder="e.g. Mary"/></div>
+      <div class="fg"><label>Last Name *</label><input id="f-last" type="text" placeholder="e.g. Heffernan"/></div>
+      <div class="fg"><label>Maiden Name</label><input id="f-maiden" type="text" placeholder="birth surname"/></div>
+      <div class="fg"><label>Gender</label><select id="f-gender"><option value="male">Male</option><option value="female">Female</option><option value="unknown">Unknown</option></select></div>
+
+      <div class="fsec">Dates & Places</div>
+      <div class="fg"><label>Birth Date</label><input id="f-birth" type="text" placeholder="e.g. 15 Mar 1922"/></div>
+      <div class="fg"><label>Birth Place</label><input id="f-birthplace" type="text" placeholder="e.g. Cork, Ireland"/></div>
+      <div class="fg"><label>Death Date</label><input id="f-death" type="text" placeholder="e.g. 4 Jun 1998"/></div>
+      <div class="fg"><label>Death Place</label><input id="f-deathplace" type="text" placeholder="e.g. Boston, MA"/></div>
+      <div class="fg full"><label>Burial Place</label><input id="f-burial" type="text" placeholder="e.g. Forest Glade Cemetery, Wakefield, MA"/></div>
+
+      <div class="fsec">Generation & Relationships</div>
+      <div class="fg"><label>Generation</label>
+        <select id="f-gen">
+          <option value="0">0 — My Generation (Brian)</option>
+          <option value="1" selected>1 — Parents</option>
+          <option value="2">2 — Grandparents</option>
+          <option value="3">3 — Great-Grandparents</option>
+          <option value="4">4 — 2nd Great-Grandparents</option>
+          <option value="5">5 — 3rd Great-Grandparents</option>
+          <option value="6">6 — 4th Great-Grandparents</option>
+          <option value="7">7 — 5th Great-Grandparents</option>
+          <option value="8">8 — 6th Great-Grandparents</option>
+          <option value="9">9 — 7th Great-Grandparents</option>
+          <option value="10">10 — 8th Great-Grandparents</option>
+          <option value="11">11 — 9th Great-Grandparents</option>
+          <option value="12">12 — 10th Great-Grandparents</option>
+          <option value="13">13 — 11th Great-Grandparents (Research)</option>
+        </select>
+      </div>
+      <div class="fg"><label>Occupation</label><input id="f-occ" type="text" placeholder="e.g. Farmer"/></div>
+      <div class="fg"><label>Spouse</label><select id="f-spouse"><option value="">— None —</option></select></div>
+      <div class="fg"><label>Father</label><select id="f-father"><option value="">— Unknown —</option></select></div>
+      <div class="fg"><label>Mother</label><select id="f-mother"><option value="">— Unknown —</option></select></div>
+
+      <div class="fsec">Children</div>
+      <div class="fg full" id="lc-display" style="display:none">
+        <label>Linked Profiles (in tree)</label>
+        <div id="lc-chips" class="rchips" style="margin-top:4px"></div>
+      </div>
+      <div class="fg full"><label>Additional Children (names only)</label>
+        <textarea id="f-cnotes" placeholder="e.g. Mary Heffernan b. 1851…" style="min-height:46px"></textarea>
+      </div>
+
+      <div class="fsec">Photos</div>
+      <div class="fg full">
+        <div class="pthumbs" id="pthumbs"></div>
+        <div class="pfrow" style="margin-bottom:6px"><input id="f-cap" type="text" placeholder="Caption (optional)…"/></div>
+        <div class="pfrow">
+          <button type="button" class="btn-sm" onclick="pastePhoto()">📋 Paste</button>
+          <label class="btn-sm" style="cursor:pointer">📁 Upload<input type="file" accept="image/*" style="display:none" onchange="uploadPhoto(event)"/></label>
+          <input id="f-url" type="text" placeholder="…or image URL"/>
+          <button type="button" class="btn-sm" onclick="addUrl()">+URL</button>
+        </div>
+        <p style="font-size:.7rem;color:var(--muted);margin-top:5px">💡 Tip: Use "Paste" after copying an image from your document. Uploaded photos are stored in your browser — use URLs for cross-device access.</p>
+      </div>
+
+      <div class="fsec">Notes</div>
+      <div class="fg full"><label>Research Notes & Sources</label>
+        <textarea id="f-notes" placeholder="Sources, notes, research details…"></textarea>
+      </div>
+      <div class="fg full">
+        <label class="rcheck"><input type="checkbox" id="f-research"/> Mark as Research Tree (unconfirmed lineage)</label>
+      </div>
+    </div>
+    <div class="fact">
+      <button class="btn-del" id="btn-del" style="display:none" onclick="deletePerson()">🗑 Delete</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="savePerson()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lbox" id="lbox" onclick="closeLbox(event)">
+  <button class="lbox-x" onclick="closeLbox()">✕</button>
+  <img id="lbox-img" src="" alt=""/>
+  <div class="lbox-cap" id="lbox-cap"></div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const DEFAULT_PEOPLE=[{"id":1,"first":"Brian","last":"Heffernan","maiden":"","gender":"male","gen":0,"research":false,"birth":"","birthPlace":"","death":"","deathPlace":"","occupation":"","spouse":null,"father":2,"mother":3,"childrenNotes":"","photos":[],"notes":"Root of this family tree. Brian Patrick Heffernan."},{"id":2,"first":"Robert","last":"Heffernan","maiden":"","gender":"male","gen":1,"research":false,"birth":"","birthPlace":"","death":"","deathPlace":"","occupation":"","spouse":3,"father":4,"mother":5,"childrenNotes":"","photos":[],"notes":""},{"id":3,"first":"Amanda","last":"Heffernan","maiden":"Orf","gender":"female","gen":1,"research":false,"birth":"","birthPlace":"","death":"","deathPlace":"","occupation":"","spouse":2,"father":6,"mother":7,"childrenNotes":"","photos":[],"notes":""},{"id":4,"first":"William Paul","last":"Heffernan","maiden":"","gender":"male","gen":2,"research":false,"birth":"20 October 1939","birthPlace":"Somerville, Middlesex, Massachusetts","death":"11 October 2021","deathPlace":"Wakefield, Middlesex, Massachusetts","occupation":"","spouse":5,"father":8,"mother":9,"childrenNotes":"David Heffernan, Thomas Heffernan","photos":[],"notes":"Buried at Forest Glade Cemetery, Wakefield, Massachusetts."},{"id":5,"first":"Eileen","last":"Heffernan","maiden":"Hooley","gender":"female","gen":2,"research":false,"birth":"","birthPlace":"","death":"","deathPlace":"","occupation":"","spouse":4,"father":10,"mother":11,"childrenNotes":"","photos":[],"notes":"Daughter of Daniel Muriel Hooley and Margaret Theresa Shea. Married William Paul Heffernan."},{"id":6,"first":"Thomas","last":"Orf","maiden":"","gender":"male","gen":2,"research":false,"birth":"ca. 1949","birthPlace":"Missouri","death":"","deathPlace":"","occupation":"","spouse":7,"father":12,"mother":13,"childrenNotes":"","photos":[],"notes":"Appears in the 1950 census as 'Thomas Lewis', age 1, son of Joseph B. Orf and Catherine M. Wolfender."},{"id":7,"first":"Linda","last":"Orf","maiden":"Neathery","gender":"female","gen":2,"research":false,"birth":"ca. 1949","birthPlace":"Fort Worth, Tarrant, Texas","death":"","deathPlace":"Seabrook, New Hampshire","occupation":"","spouse":6,"father":14,"mother":15,"childrenNotes":"","photos":[],"notes":"Daughter of Guy Kenneth Neathery and Vivian. Appears as 'Linda L.', age 1, in the 1950 Fort Worth census. Named as 'Linda Orf of Seabrook, N.H.' in her father's 2009 obituary — confirming she married Thomas Lewis Orf."},{"id":8,"first":"William Phelan","last":"Heffernan","maiden":"","gender":"male","gen":3,"research":false,"birth":"10 July 1902","birthPlace":"Cambridge, Middlesex, Massachusetts","death":"2 June 1991","deathPlace":"Reading, Middlesex, Massachusetts","occupation":"","spouse":9,"father":16,"mother":17,"childrenNotes":"","photos":[],"notes":"Son of William Samuel Heffernan and Mary Agnes Toomey. Lived in Somerville, MA before settling in Reading, MA."},{"id":9,"first":"Margaret Mary","last":"Heffernan","maiden":"Meagher","gender":"female","gen":3,"research":false,"birth":"12 May 1911","birthPlace":"Canso, Guysborough, Nova Scotia, Canada","death":"8 March 1991","deathPlace":"","occupation":"","spouse":8,"father":18,"mother":19,"childrenNotes":"","photos":[],"notes":"Daughter of Robert Joseph Meagher and Elizabeth 'Bessie' Phalen. Born and raised in Canso, Nova Scotia. Married William Phelan Heffernan."},{"id":10,"first":"Daniel Murial","last":"Hooley","maiden":"","gender":"male","gen":3,"research":false,"birth":"1904","birthPlace":"Massachusetts","death":"5 September 1987","deathPlace":"Arlington, Middlesex, Massachusetts","occupation":"Cashier","spouse":11,"father":20,"mother":21,"childrenNotes":"","photos":[],"notes":"Son of Daniel M. Hooley (policeman) and Alice M. Harrington. Lived at 19 Medford St., Arlington, MA. Worked as a cashier per 1930 census."},{"id":11,"first":"Margaret Theresa","last":"Hooley","maiden":"Shea","gender":"female","gen":3,"research":false,"birth":"1915","birthPlace":"Connecticut","death":"29 June 1983","deathPlace":"Arlington, Middlesex, Massachusetts","occupation":"","spouse":10,"father":22,"mother":23,"childrenNotes":"","photos":[],"notes":"Daughter of Denis John Shea and Margaret Hourihan. Grew up in East Hartford and Hartford, CT. Married Daniel Muriel Hooley. Buried in Arlington."},{"id":12,"first":"Joseph Bernard","last":"Orf","maiden":"","gender":"male","gen":3,"research":false,"birth":"19 October 1906","birthPlace":"Josephville, Saint Charles, Missouri","death":"31 August 1986","deathPlace":"St. Louis, Missouri","occupation":"Stock Clerk, Union Electric Company","spouse":13,"father":24,"mother":25,"childrenNotes":"","photos":[],"notes":"Baptized October 21, 1906 at St. Joseph Catholic Church, Josephville, MO. Registered for WWII draft October 14, 1940. Buried in Resurrection Cemetery, Affton, St. Louis County, MO (Plot Sec. 42, Lot 200)."},{"id":13,"first":"Catherine Marie","last":"Orf","maiden":"Wolfender","gender":"female","gen":3,"research":false,"birth":"24 December 1909","birthPlace":"Missouri","death":"4 October 1996","deathPlace":"Missouri","occupation":"Power Operator (dress factory)","spouse":12,"father":26,"mother":27,"childrenNotes":"","photos":[],"notes":"Married Joseph Bernard Orf on October 19, 1940 in St. Louis, MO. Buried in Resurrection Cemetery, Affton, MO alongside husband Joseph."},{"id":14,"first":"Guy Kenneth","last":"Neathery","maiden":"","gender":"male","gen":3,"research":false,"birth":"10 December 1923","birthPlace":"Sherman, Grayson, Texas","death":"16 February 2009","deathPlace":"St. Louis, Missouri","occupation":"Telephone Equipment (Stratoplex Electric)","spouse":15,"father":28,"mother":29,"childrenNotes":"","photos":[],"notes":"Enlisted U.S. Army October 6, 1942 in San Antonio, TX. Participated in the Battle of the Bulge (WWII). Lived in Ward, TX (1940) and Fort Worth, TX (1950). Buried at Jefferson Barracks National Cemetery, Lemay Township, St. Louis County, MO (Section 1-11B, Site 2513) with full military honors. Survived by wife Rosie, son Larry Neathery of St. Charles, MO, and daughter Linda Orf of Seabrook, NH."},{"id":15,"first":"Vivian","last":"Neathery","maiden":"Randolph","gender":"female","gen":3,"research":false,"birth":"ca. 1929","birthPlace":"Texas","death":"","deathPlace":"","occupation":"","spouse":14,"father":61,"mother":62,"childrenNotes":"","photos":[],"notes":"Wife of Guy Kenneth Neathery."},{"id":16,"first":"William Samuel","last":"Heffernan","maiden":"","gender":"male","gen":4,"research":false,"birth":"January 1869","birthPlace":"Cambridge, Middlesex, Massachusetts","death":"","deathPlace":"Somerville, Massachusetts","occupation":"","spouse":17,"father":30,"mother":31,"childrenNotes":"","photos":[],"notes":"Born January 1869 in Cambridge, MA. Son of Irish immigrants Joseph Heffernan and Bridget O'Donald."},{"id":17,"first":"Mary Agnes","last":"Heffernan","maiden":"Toomey","gender":"female","gen":4,"research":false,"birth":"","birthPlace":"Cambridge, Massachusetts","death":"","deathPlace":"","occupation":"","spouse":16,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of William Samuel Heffernan. Born in Cambridge, Massachusetts."},{"id":18,"first":"Robert Joseph","last":"Meagher","maiden":"","gender":"male","gen":4,"research":false,"birth":"9 April 1876","birthPlace":"Cape Canso, Guysborough, Nova Scotia, Canada","death":"1962","deathPlace":"Canso, Guysborough, Nova Scotia, Canada","occupation":"Fisherman","spouse":19,"father":32,"mother":33,"childrenNotes":"","photos":[],"notes":"Born to John Meagher (fisherman) and Mary Elizabeth McDonald. Married Elizabeth Maria 'Bessie' Phalen on April 29, 1906 in Guysborough, NS. Buried at Star of the Sea Cemetery, Canso, NS."},{"id":19,"first":"Elizabeth","last":"Meagher","maiden":"Phalen","gender":"female","gen":4,"research":false,"birth":"ca. 1883","birthPlace":"Nova Scotia, Canada","death":"1943","deathPlace":"","occupation":"","spouse":18,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Known as 'Bessie'. Married Robert Joseph Meagher on April 29, 1906 in Guysborough, NS. Buried at Star of the Sea Cemetery, Canso, NS. Gravestone shows 1886–1943; narrative sources suggest birth ca. 1883."},{"id":20,"first":"Daniel M.","last":"Hooley","maiden":"","gender":"male","gen":4,"research":false,"birth":"24 October 1862","birthPlace":"Ireland","death":"5 October 1931","deathPlace":"Arlington, Middlesex, Massachusetts","occupation":"Policeman","spouse":21,"father":34,"mother":35,"childrenNotes":"","photos":[],"notes":"Born in Ireland. Son of Jeremiah Hooley and Mary Hooley (both from Ireland). Married Alice M. Harrington on February 12, 1893 in Boston. Buried in Mount Pleasant Cemetery, Arlington, MA."},{"id":21,"first":"Alice","last":"Hooley","maiden":"Harrington","gender":"female","gen":4,"research":false,"birth":"26 June 1874","birthPlace":"Boston, Massachusetts","death":"1936","deathPlace":"","occupation":"Clerk","spouse":20,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Boston, MA. Father Jeremiah Harrington (born England), mother Annie (born Ireland). Married Daniel M. Hooley on February 12, 1893 in Boston."},{"id":22,"first":"Denis John","last":"Shea","maiden":"","gender":"male","gen":4,"research":false,"birth":"5 September 1872","birthPlace":"County Cork, Ireland","death":"21 August 1955","deathPlace":"East Hartford, Hartford, Connecticut","occupation":"Laborer","spouse":23,"father":36,"mother":37,"childrenNotes":"","photos":[],"notes":"Born in County Cork, Ireland. Son of Denis Shea and Catherine Collins. Arrived USA 1897. Married Margaret Hourihan on June 24, 1908 in Hartford, CT."},{"id":23,"first":"Margaret","last":"Shea","maiden":"Hourihan","gender":"female","gen":4,"research":false,"birth":"ca. 1877","birthPlace":"Ireland","death":"","deathPlace":"","occupation":"","spouse":22,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Ireland ca. 1877. Native tongue was Irish. Married Denis John Shea on June 24, 1908 in Hartford, CT."},{"id":24,"first":"Lewis (Louis)","last":"Orf","maiden":"","gender":"male","gen":4,"research":false,"birth":"6 January 1865","birthPlace":"Cuivre Township, Saint Charles, Missouri","death":"14 December 1936","deathPlace":"Josephville, Saint Charles, Missouri","occupation":"Farmer","spouse":25,"father":38,"mother":39,"childrenNotes":"","photos":[],"notes":"Son of August Carl Orf (born Germany) and Christina Mueller (born Prussia). Married Pauline Josephine Elizabeth Parr on April 26, 1888 in Saint Charles, MO. Buried at Saint Joseph Cemetery, Josephville, MO. Gravestone name spelled 'LOUIS'."},{"id":25,"first":"Pauline","last":"Orf","maiden":"Parr","gender":"female","gen":4,"research":false,"birth":"20 December 1867","birthPlace":"Missouri","death":"29 April 1951","deathPlace":"","occupation":"Homemaker","spouse":24,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Known as 'Polina' in some census records. Married Lewis Orf on April 26, 1888 in Saint Charles, MO."},{"id":26,"first":"John","last":"Wolfender","maiden":"","gender":"male","gen":4,"research":false,"birth":"ca. 1860","birthPlace":"Switzerland","death":"","deathPlace":"St. Louis, Missouri","occupation":"Sausage Maker / Butcher","spouse":27,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Switzerland ca. 1860. Native tongue was Swiss-German. Lived in St. Louis, MO. His parents were born in Switzerland and spoke Swedish."},{"id":27,"first":"Caroline","last":"Wolfender","maiden":"Hommer","gender":"female","gen":4,"research":false,"birth":"ca. 1871","birthPlace":"Germany","death":"","deathPlace":"","occupation":"","spouse":26,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Germany ca. 1871. Native tongue was German. Lived in St. Louis, MO."},{"id":28,"first":"Ollie James","last":"Neathery","maiden":"","gender":"male","gen":4,"research":false,"birth":"29 January 1886","birthPlace":"Springfield, Greene, Missouri","death":"24 July 1941","deathPlace":"Sherman, Grayson, Texas","occupation":"Deputy Sheriff / Farmer","spouse":29,"father":40,"mother":41,"childrenNotes":"","photos":[],"notes":"Son of Ambrose Joe Neathery and Martha 'Mattie' Oliver. Married Maggie D. Cowart on October 24, 1909 in Grayson, TX. Died of cardiorenal disease. Buried at Pilot Grove Cemetery, Grayson County, TX."},{"id":29,"first":"Maggie","last":"Neathery","maiden":"Cowart","gender":"female","gen":4,"research":false,"birth":"ca. 1886","birthPlace":"Texas","death":"1934","deathPlace":"Texas","occupation":"","spouse":28,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Texas ca. 1886. Married Ollie James Neathery on October 24, 1909. Buried at Pilot Grove Cemetery, Grayson County, TX. Gravestone: 'MOTHER MAGGIE D. 1886–1934'."},{"id":30,"first":"Joseph","last":"Heffernan","maiden":"","gender":"male","gen":5,"research":false,"birth":"1823","birthPlace":"Cashel, County Tipperary, Ireland","death":"12 January 1895","deathPlace":"Malden, Middlesex, Massachusetts","occupation":"Shoemaker","spouse":31,"father":42,"mother":43,"childrenNotes":"","photos":[],"notes":"Born in Cashel, Co. Tipperary, Ireland. Son of James Heffernan and Ann Cross. Emigrated to Massachusetts. U.S. naturalization dated October 26, 1858 (U.S. Dist. Boston, Vol. 29, p. 195). Buried in Malden, MA."},{"id":31,"first":"Bridget","last":"Heffernan","maiden":"O'Donald","gender":"female","gen":5,"research":false,"birth":"ca. 1834","birthPlace":"Carrick-on-Suir, County Tipperary, Ireland","death":"4 December 1884","deathPlace":"Malden, Middlesex, Massachusetts","occupation":"","spouse":30,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Gravestone at Malden, MA: 'BRIDGET, BELOVED WIFE OF JOSEPH HEFFERNAN, BORN CARRICKOSUIRE CO. TIPPERARY IRELAND, DIED DEC. 4 1884, AGED 50 YRS'."},{"id":32,"first":"John","last":"Meagher","maiden":"","gender":"male","gen":5,"research":false,"birth":"1828","birthPlace":"Nova Scotia, Canada","death":"","deathPlace":"Cape Canso, Guysborough, Nova Scotia","occupation":"Fisherman","spouse":33,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born 1828 in Nova Scotia. Fisherman; Irish Catholic. Per 1876 birth register: 'John Meagher, Fisher Man, Cape Canso'."},{"id":33,"first":"Mary","last":"Meagher","maiden":"McDonald","gender":"female","gen":5,"research":false,"birth":"ca. 1834","birthPlace":"Nova Scotia, Canada","death":"","deathPlace":"","occupation":"","spouse":32,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of John Meagher. 1881 census confirms family at Cape Canso."},{"id":34,"first":"Jeremiah","last":"Hooley","maiden":"","gender":"male","gen":5,"research":false,"birth":"","birthPlace":"Ireland","death":"","deathPlace":"","occupation":"","spouse":35,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Ireland. Father of Daniel M. Hooley (b. 1862). Listed on Daniel's 1893 Boston marriage certificate."},{"id":35,"first":"Mary","last":"Hooley","maiden":"","gender":"female","gen":5,"research":false,"birth":"","birthPlace":"Ireland","death":"","deathPlace":"","occupation":"","spouse":34,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born in Ireland. Mother of Daniel M. Hooley. Listed on Daniel's 1893 Boston marriage certificate."},{"id":36,"first":"Denis","last":"Shea","maiden":"","gender":"male","gen":5,"research":false,"birth":"ca. 1840","birthPlace":"Ireland","death":"","deathPlace":"New York City, New York","occupation":"","spouse":37,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born ca. 1840 in Ireland. Father of Denis John Shea (b. 1872, Cork). Lived in New York City (1880 census)."},{"id":37,"first":"Catherine","last":"Shea","maiden":"Collins","gender":"female","gen":5,"research":false,"birth":"ca. 1844","birthPlace":"Ireland","death":"","deathPlace":"","occupation":"","spouse":36,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born ca. 1844 in Ireland. Wife of Denis Shea. Mother of Denis John Shea."},{"id":38,"first":"August Carl","last":"Orf","maiden":"","gender":"male","gen":5,"research":false,"birth":"3 February 1829","birthPlace":"Weimar, Sachsen-Weimar-Eisenach, Germany","death":"25 July 1882","deathPlace":"Wentzville, Saint Charles, Missouri","occupation":"Farmer","spouse":39,"father":46,"mother":47,"childrenNotes":"","photos":[],"notes":"Born in Weimar, Germany. Son of Johannes Friedrich Orf and Dorothea Anna Erhard. Emigrated to America; in 1850 Missouri census (name spelled 'Eurf'). Married Christina Mueller on February 4, 1864 in Saint Charles, MO. Gravestone inscription in German at Saint Joseph Cemetery, Josephville, MO."},{"id":39,"first":"Christina","last":"Orf","maiden":"Mueller","gender":"female","gen":5,"research":false,"birth":"ca. 1845","birthPlace":"Prussia","death":"","deathPlace":"","occupation":"","spouse":38,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born ca. 1845 in Prussia. Married August Carl Orf on February 4, 1864 in Saint Charles, MO."},{"id":40,"first":"Ambrose Joe","last":"Neathery","maiden":"","gender":"male","gen":5,"research":false,"birth":"3 April 1857","birthPlace":"Clinton, Hickman, Kentucky","death":"26 August 1936","deathPlace":"Grayson, Texas","occupation":"Farmer","spouse":41,"father":44,"mother":45,"childrenNotes":"","photos":[],"notes":"Son of Tilford Neathery and Nancy Ellis. Married Martha Elizabeth 'Mattie' Oliver on October 14, 1880 in Clinton, KY. Died of chronic myocarditis, age 79. Buried at Pilot Grove Cemetery, Grayson County, TX."},{"id":41,"first":"Martha","last":"Neathery","maiden":"Oliver","gender":"female","gen":5,"research":false,"birth":"ca. 1859","birthPlace":"Kentucky","death":"1936","deathPlace":"Texas","occupation":"","spouse":40,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Known as 'Mattie'. Buried at Pilot Grove Cemetery, Grayson County, TX. Gravestone: 'MOTHER MATTIE 1859–1936'."},{"id":42,"first":"James","last":"Heffernan","maiden":"","gender":"male","gen":6,"research":false,"birth":"7 June 1795","birthPlace":"Cashel, County Tipperary, Ireland","death":"14 November 1866","deathPlace":"Cambridge, Middlesex, Massachusetts","occupation":"Shoemaker","spouse":43,"father":48,"mother":49,"childrenNotes":"","photos":[],"notes":"Baptism recorded June 11, 1797 in Killenaule, Co. Tipperary (as 'Jacobus Heffernan'). Son of Patrick Heffernan and Catherine Neagle. U.S. naturalization petition filed in Boston, October 26, 1858 (Vol. 29, p. 195). Buried at Catholic Mount Auburn Cemetery, Watertown, MA (HEFFERNAN LOT)."},{"id":43,"first":"Ann","last":"Heffernan","maiden":"Cross","gender":"female","gen":6,"research":false,"birth":"ca. 1797","birthPlace":"Ireland","death":"1878","deathPlace":"Massachusetts","occupation":"","spouse":42,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of James Heffernan. Buried at Catholic Mount Auburn Cemetery, Watertown, MA. Gravestone: 'ANN 1797–1878'."},{"id":44,"first":"Tilford","last":"Neathery","maiden":"","gender":"male","gen":6,"research":false,"birth":"16 November 1826","birthPlace":"Cumberland, Kentucky","death":"23 March 1910","deathPlace":"Clinton, Kentucky","occupation":"Farmer","spouse":45,"father":50,"mother":51,"childrenNotes":"Tilford Neathery and his wife Nancy.","photos":[],"notes":"Son of James Miller Neathery and Rachel Grider. Married Nancy Ellis in 1849 in Clinton, KY. Buried at Til Neathery Cemetery, Clinton County, KY."},{"id":45,"first":"Nancy","last":"Neathery","maiden":"Ellis","gender":"female","gen":6,"research":false,"birth":"ca. 1824","birthPlace":"Kentucky","death":"1889","deathPlace":"Kentucky","occupation":"","spouse":44,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Buried at Til Neathery Cemetery, Clinton County, KY. Gravestone: 'NANCY 1824–1889'."},{"id":46,"first":"Johannes","last":"Orf","maiden":"","gender":"male","gen":6,"research":false,"birth":"6 March 1795","birthPlace":"Kranlucken, Schleid, Eisenach, Saxe-Weimar-Eisenach, Germany","death":"22 April 1833","deathPlace":"Kranlucken, Wartburgkreis, Thüringen, Germany","occupation":"","spouse":47,"father":52,"mother":53,"childrenNotes":"","photos":[],"notes":"Son of Johannes Michael Orf and Elizabeth Mihm. Married Dorothea Anna Erhard on February 4, 1817 in Germany. Father of August Carl Orf (b. 1829) who emigrated to Missouri. Died at age 38."},{"id":47,"first":"Dorothea","last":"Orf","maiden":"Erhard","gender":"female","gen":6,"research":false,"birth":"ca. 1801","birthPlace":"Germany","death":"","deathPlace":"Germany","occupation":"","spouse":46,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of Johannes Friedrich Orf. Mother of August Carl Orf who emigrated to Missouri."},{"id":48,"first":"Patrick","last":"Heffernan","maiden":"","gender":"male","gen":7,"research":false,"birth":"ca. 1770","birthPlace":"Thurles, County Tipperary, Ireland","death":"","deathPlace":"County Tipperary, Ireland","occupation":"","spouse":49,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Married Catherine Neagle on September 7, 1790 in Killenaule, County Tipperary (Catholic Parish Registers 1740–1900). Parish records list him as 'Patritium Heffernan'. Earliest confirmed Heffernan ancestor on this line."},{"id":49,"first":"Catherine","last":"Heffernan","maiden":"Neagle","gender":"female","gen":7,"research":false,"birth":"","birthPlace":"Ireland","death":"","deathPlace":"","occupation":"","spouse":48,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of Patrick Heffernan. Catholic Parish Register: 'Catharina Neagle'. Married September 7, 1790 in Killenaule, County Tipperary."},{"id":50,"first":"James Miller","last":"Neathery","maiden":"","gender":"male","gen":7,"research":false,"birth":"24 January 1798","birthPlace":"Burke, North Carolina","death":"13 January 1879","deathPlace":"Clinton, Kentucky","occupation":"Farmer","spouse":51,"father":54,"mother":55,"childrenNotes":"","photos":[],"notes":"Son of Robert Neathery and Sarah Sally Scott. Married Rachel Grider about 1821 in Cumberland, KY. Buried at Andrew Cemetery, Clinton County, KY (grave was moved when Lake Cumberland was built). Gravestone: 'JAMES NEATHERY BORN JAN. 24 1798 DIED JAN. 13 1879'."},{"id":51,"first":"Rachel","last":"Neathery","maiden":"Grider","gender":"female","gen":7,"research":false,"birth":"9 January 1801","birthPlace":"Kentucky","death":"30 September 1863","deathPlace":"Kentucky","occupation":"","spouse":50,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Buried at Andrew Cemetery, Clinton County, KY. Gravestone: 'RACHEL, Wife of JAMES NEATHERY, BORN Jan. 9, 1801, DIED Sept. 30, 1863'."},{"id":52,"first":"Johannes","last":"Orf","maiden":"","gender":"male","gen":7,"research":false,"birth":"15 November 1756","birthPlace":"Bermbach, Landkreis Schmalkalden-Meiningen, Thüringen, Germany","death":"1804","deathPlace":"Kassel, Hesse, Germany","occupation":"","spouse":53,"father":56,"mother":57,"childrenNotes":"","photos":[],"notes":"Son of Michael Orf and Margarette Henkel. Father of Johannes Friedrich Orf (b. 1795). Died 1804 in Kassel, Hesse, age 48."},{"id":53,"first":"Elizabeth","last":"Orf","maiden":"Mihm","gender":"female","gen":7,"research":false,"birth":"ca. 1759","birthPlace":"Germany","death":"","deathPlace":"Germany","occupation":"","spouse":52,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of Johannes Michael Orf. Mother of Johannes Friedrich Orf (b. 1795)."},{"id":54,"first":"Robert","last":"Neathery","maiden":"","gender":"male","gen":8,"research":false,"birth":"ca. 1754","birthPlace":"Mecklenburg, Virginia","death":"23 April 1805","deathPlace":"Clinton, Kentucky","occupation":"","spouse":55,"father":58,"mother":63,"childrenNotes":"","photos":[],"notes":"Son of Thomas Nethery. Married Sarah Sally Scott in 1778 in Burke, NC (first wife). Had at least 7 sons and 1 daughter including James Miller Neathery (b. 1798). Moved from Burke County, NC to Clinton, KY. Note: spelling shifts from 'Nethery' to 'Neathery' across generations. Source: J. Marshall Neathery, 'Netherys of Mecklenburg County, Virginia' (2000).\n\nOTHER SOURCES:\n1790 United States Federal Census\nYear: 1790; Census Place: Burke, North Carolina; Series: M637; Roll: 7; Page: 101; Image: 68; Family History Library Film: 0568147\n\n\n1800 United States Federal Census\nYear: 1800; Census Place: Burke, North Carolina; Series: M32; Roll: 29; Page: 778; Image: 203; Family History Library Film: 337905\n\n1810 United States Federal Census\nYear: 1810; Census Place: Burksville, Cumberland, Kentucky; Roll: 9; Page: 172; Family History Number: 0181354; Image: 00181\n\nNorth Carolina, State Census, 1784-1787"},{"id":55,"first":"Sarah","last":"Neathery","maiden":"Scott","gender":"female","gen":8,"research":false,"birth":"ca. 1757","birthPlace":"North Carolina","death":"","deathPlace":"","occupation":"","spouse":54,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"First wife of Robert Neathery. Married in 1778 in Burke, NC. Mother of James Miller Neathery (b. 1798)."},{"id":56,"first":"Michael","last":"Orf","maiden":"","gender":"male","gen":8,"research":false,"birth":"ca. 1728","birthPlace":"Bermbach, Hesse, Germany","death":"","deathPlace":"Germany","occupation":"","spouse":57,"father":59,"mother":null,"childrenNotes":"","photos":[],"notes":"Son of Conrad Orf. Married Margarette Henkel on January 30, 1748 in Bermbach, Waldems, Rheingau-Taunus-Kreis, Hesse, Germany. Father of Johannes Michael Orf (b. 1756)."},{"id":57,"first":"Margarette","last":"Orf","maiden":"Henkel","gender":"female","gen":8,"research":false,"birth":"ca. 1728","birthPlace":"Germany","death":"","deathPlace":"","occupation":"","spouse":56,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Wife of Michael Orf. Married January 30, 1748 in Bermbach, Hesse, Germany. Mother of Johannes Michael Orf."},{"id":58,"first":"Thomas Sr.","last":"Nethery","maiden":"","gender":"male","gen":8,"research":false,"birth":"ca. 1719","birthPlace":"Colonial Virginia / Pennsylvania","death":"22 January 1798","deathPlace":"Mecklenburg, Virginia","occupation":"Farmer / Landowner","spouse":63,"father":60,"mother":64,"childrenNotes":"","photos":[],"notes":"Born ca. 1719, likely in colonial Pennsylvania or Maryland; migrated to Mecklenburg County, VA by ca. 1760. Purchased 330 acres in Mecklenburg County from Richard Witton (first High Sheriff of Mecklenburg County). Married three times; had children by all three wives. Father of Robert Neathery. First Wife: Mary Margaret Powell, Second Wife: Unknown, Third wife: Mary Ann 'Nancy' Baker (married January 27, 1789). Left a will giving land to wife and their children. Buried in family cemetery on his land in Mecklenburg County, VA. Name spelled variously: Nethery / Neathery / Netherly. Source: J. Marshall Neathery, 'Netherys of Mecklenburg County, Virginia' (2000).\n\nTHOMAS NETHERY, SR. (1719 -1798) came to Mecklenburg County, Virginia, about 1760 - 1761. It is believed that he came from Kennett Township, Chester County, Pennsylvania. He bought land from Richard Witton, the first High Sheriff of Mecklenburg County, Virginia, when it was established from Lunenburgh County in 1765. Thomas Nethery had some 385 acres in the present-day Scotts Crossroads Community of Mecklenburg County, some three to four miles northeast of the town of Chase City, Virginia. This old homestead is divided between four landowners today. Thomas Nethery was married three times and had children by all three wives. Unfortunately, we do not know the names of his first two wives. However, we do know the names of his children! They are as follows: DANIEL NETHERY (the elder), died ca. 1778, of Rowan-Guilford Counties, N. C.; ROBERT NETHERY (ca. 1754 - 1802), wife, Sarah Scott, of Burke County, N. C.; SARAH NETHERY JACKS, husband William Jacks, of Wilkes County, N. C.; ESTHER NETHERY HAGLER, husband Abraham Hagler, of Wilkes County, N. C. and Roane County, Tennessee; MARY NETHERY STONE, husband Thomas Stone, of Mecklenburg County, Va.; WILLIAM NETHERY of Mecklenburg County, Va. and Carter (then Johnson) County, Tennessee; THOMAS NETHERY, JR. (1765 - 1809), wife Mary Wells, of Mecklenburg County, Va. and Knox County, Tennessee; and JAMES NETHERY (1773 - 1814), wife Eleanor Thompson, of Mecklenburg and Nottoway Counties, Va. On January 27, 1789, Thomas Nethery, Sr. was married to his third wife, MARY ANN \"Nancy\" BAKER (1765 -1833), by the Right Rev. Thomas Scott, a Scotch Episcopal minister, in Mecklenburg County, Va.\n\nOTHER:\nNetherys of Mecklenburg County, Virginia, Written and owned by J. Marshall Neathery, Rolesville, North Carolina\nFebruary 17, 2000\n\nThomas Nethery was born in 1719 probably in the Colony of Maryland. Very little is known of his life in Pennsylvania! Suffice it to say that, from the Chester County tax records, we have learned that he was married, had children, and was a land tenant.\nUpon coming to Mecklenburg County, he apparently built a homestead on some fifty acres of land on Cattail Creek, a tributary of the South Fork of the Meherrin River. [Refer to the \"Scotts\" map depicting Neathery lands in Mecklenburg.]\nThe first known mention of Thomas Nethery in the Mecklenburg County, Virginia area is actually in the Lunenburg Court records of 1763 when he was appointed to work with Richard Witton, Thomas Erskine, John Linton, Philip Poindexter, et. al., on the upkeep of a public road. (Lunenburg Ct. Order Bk. 9, Page 214)\n\nAccording to an early land deed of Mecklenburg County, Thomas Nethery purchased an additional 330 acres of land, more or less, on August 14, 1769, from Richard Witton, who served as the first High Sheriff of Mecklenburg. The purchase price was twenty pounds \"of current money of Virginia.\" This land adjoined the tract he was already living on, and all of it was of a larger tract of 875 acres received by Richard Witton in a patent at Williamsburg, Virginia on September 16, 1765. (Patent Book 36, Page 859) As referenced above, the Nethery tract was on both sides of Cattail Creek; and, on the north and west sides of Dry Creek, with its southern-most area being near the head-waters of Allens Creek. Allens Creek runs southerly to the Roanoke River.\n\nThomas Nethery was married three times and had children by all three wives. Unfortunately, no one knows the names of the first two wives, although their children's names are known. They were: Daniel Nethery of Mecklenburg County, Virginia and Guilford County, North Carolina; Robert Nethery of Mecklenburg County, Virginia, and Burke County, North Carolina; Mary Nethery Stone, wife of Thomas Stone of Mecklenburg County; Sarah Nethery Jacks, wife of William Jacks of Wilkes County, North Carolina; Thomas Nethery, Jr. of Mecklenburg County, Virginia, and Knox County, Tennessee; William Nethery of Mecklenburg County, Virginia, and Carter County (now Johnson County), Tennessee; and, James Nethery of Mecklenburg and Nottoway Counties, Virginia.\n\nOn January 27, 1789, Thomas Nethery, Sr. was married a third time to Mary Ann \"Nancy\" Baker in Mecklenburg County. The Rev. Thomas Scott, of the Protestant Episcopal Church performed the ceremony. This minister of the gospel had only recently moved to Virginia from his native Scotland. He was allowed by the Mecklenburg County Court to declare his fidelity to the Commonwealth of Virginia in October, 1787. In December, 1788, the Rev. Scott was granted the privilege to solemnize marriages by the County Court.\n\nWe are not sure of the parentage of Ann \"Nancy\" Baker Nethery, but we know that George Baker signed her marriage bond. It is believed, with good reason, that he was Nancy's father. Nancy Nethery had several sisters and at least one brother whose name was William Baker. Thomas Nethery, Sr. and Nancy Nethery were the parents of four children: 1DANIEL NETHERY (more about later); 2CATHERINE NETHERY (ca. 1791 - ca. 1875), who never married; 3JOHN NETHERY (ca. 1793 - 1874), who married Nancy Westbrook in Mecklenburg County, on December 26, 1815. They later moved to Person County, North Carolina where Nancy Nethery died. John Nethery was then married to Elizabeth Draper. John Nethery had children by both wives. 4RICHARD NETHERY (ca. 1794 - ca. 1878), the fourth and last child of Thomas and Nancy Nethery, was married to Martha Baker on October 8, 1830, and lived in Lunenburg and Mecklenburg Counties. It is thought that Martha and Richard Nethery were cousins. All five of their sons died in the Civil War! They also had several daughters.\n\nDaniel and John Nethery were soldiers in Col. Grief Green's 6th Virginia Militia of Mecklenburg County, during the War of 1812. Daniel Nethery went as a \"substitute\" for Ned Neal, who may have been the prominent landowner and farmer, Edward Neal, who also lived on the South Fork of the Meherrin River, and whose land adjoined the Netherys. Both Netherys were privates in rank and served in the Norfolk, Virginia area, from late 1813 till mid-1814.\n\nWhen Thomas Nethery, Sr. died, in the springtime of 1798, he left a will in which all of his lands and personal properties were to go to his third wife and their four children. He was buried in the soil of his beloved land in a family cemetery which he had established. [Some thirteen years ago, this writer, one of his and Nancy's many 1gr-2gr-3gr grandsons, placed a memorial stone at their graves.] Thomas Nethery, Sr. left nothing to his children by his first two wives, since he had provided for them when they left him."},{"id":59,"first":"Conrad","last":"Orf","maiden":"","gender":"male","gen":8,"research":false,"birth":"ca. 1705","birthPlace":"Germany","death":"","deathPlace":"Germany","occupation":"","spouse":null,"father":null,"mother":null,"childrenNotes":"","photos":[],"notes":"Born ca. 1705 in Germany. Father of Michael Orf (b. ca. 1728). Earliest confirmed Orf ancestor in this German line. The name also appears as 'Urff' in some records."},{"id":60,"first":"James","last":"Nethery","maiden":"","gender":"male","gen":9,"research":true,"birth":"ca. 1690","birthPlace":"Perthshire, Scotland","death":"ca. 1722","deathPlace":"Maryland, British Colonial America","occupation":"","spouse":64,"father":null,"mother":null,"childrenNotes":"Thomas Nethery (ca. 1719–1798, Mecklenburg, Virginia)","photos":[],"notes":"SPECULATIVE — connection is not definitively proven. A Jacobite prisoner named James Nethery was deported from Scotland to Maryland in 1716 following the failed Jacobite uprising of 1715. He appears in early Maryland colonial records and is believed to be the father of Thomas Nethery (ca. 1719–1798, Virginia). Source: J. Marshall Neathery, 'Netherys of Mecklenburg County, Virginia' (2000). This is the most speculative link in the family tree.\n\nCourt record: death: Virginia, United States\nNetherys of Mecklenburg County, Virginia, Written and owned by J. Marshall Neathery, Rolesville, North Carolina\nFebruary 17, 2000\nIn David Dobson's book, DIRECTORY OF SCOTS (1650-1775):BRITISH AND WEST INDIES RECORDS, James Nethery (also Netherway, Nevery, and Nithery) is listed as a Jacobite prisoner of war in the Rebellion of 1715. This reference can be found in other bibliographies as well. According to The Jacobite Association of Greenwich, Connecticut, in correspondence with this writer, James Nethery was in the Earl of Wintoun's brigade. He was captured in the battle of Preston, England on November 14, 1715, by the Loyalist forces of His Majesty, King George I. In May, 1716, Nethery and seventy-nine other prisoners of war were dispatched from Liverpool, England on the Irish ship \"Friendship\", with Captain Michael Mankin in charge. Their destination was deportation to the Colony of Maryland in America. They arrived in Maryland in August of 1716. James Nethery and fellow prisoners, John Potter and Dugall McQueen, were purchased for a seven-year indenture by Col. William Holland, a wealthy Maryland landowner and political leader.\n\nIt is believed by some of us, upon the preponderance of limited evidence, that James Nethery was the father of Thomas Nethery, the latter migrating to Mecklenburg County, Virginia about 1760. Thomas Nethery moved from the Kinnett Township of Chester County, Pennsylvania to an area of the South Fork of the Meherrin River. This area would be known later as the Scotts Crossroad Community, which is three miles northeast of the present-\nday town of Chase City, off of Virginia Highway 47\n\nNational Genealogical Society\" Quarterly, March 1976, Vol 64, number 1. By Clifford Neal Smith (594 W. Lincoln Hwy, DeKalb, IL 60115): \nAmong the persons transported to the American colonies in 1716 were 637 Scottish rebels captured at Preston, Lancashire, on 14 Nov 1715. The rebels were supporters of the exiled James II of England and his heirs. There were many such adherents among the Roman Catholics of Scotland, and some in Ireland, and among the Nonjurors, a dissident group within the Church of England.\n \nDuring the rebellion of 1715 the rebel forces entered Preston on 9 Nov and, after proclaiming as their king the chevalier of St. George, remained there for several days, during which the government forces advanced upon them. The town was assaulted, and on 14 Nov the rebel general Thomas FORSTER surrendered his army to the King's forces. Persons shown below, as compiled from ten ship manifests, were taken prisoner and sent to the American Colonies the following spring as indentured servants for a seven-year period. Those who refused to be voluntarily indentured were forced into that condition upon arrival in the colonies.\nF Va/Md \"Friendship\". Capt Michael MANKIN, bound for MD or VA from Liverpool 24 May 1716 with 80 prisoners."},{"first":"Robert Lee","last":"Randolph","maiden":"","gender":"male","gen":4,"birth":"5 October 1897","birthPlace":"Quanah, Hardeman, Tarrant, Texas","death":"26 January 1954","deathPlace":"Fort Worth, Tarrant, Texas","occupation":"Clerk","childrenNotes":"Garland Howard Randolph b. 1920, Dorothy L Randolph b. 1922, Vivian Randolph b. 1929","notes":"Married Leonora Cresswell June 25, 1919 in San Antonio, Texas. Burial\nLaurel Land - Rose Hill Memorial Park\nFort Worth, Tarrant County, Texas, USA\nMemorial ID\n138252951","research":false,"photos":[],"spouse":62,"father":65,"mother":66,"id":61},{"first":"Leonora","last":"Randolph","maiden":"Cresswell","gender":"female","gen":4,"birth":"","birthPlace":"","death":"","deathPlace":"","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":61,"father":null,"mother":null,"id":62},{"first":"Mary Margaret","last":"Nethery","maiden":"Powell","gender":"male","gen":8,"birth":"1714","birthPlace":"","death":"","deathPlace":"","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":58,"father":null,"mother":null,"id":63},{"first":"Susan Sarah A","last":"Nethery","maiden":"Bold","gender":"male","gen":9,"birth":"","birthPlace":"","death":"","deathPlace":"","occupation":"","childrenNotes":"","notes":"","research":true,"photos":[],"spouse":60,"father":null,"mother":null,"id":64},{"first":"Samuel David","last":"Randolph","maiden":"","gender":"male","gen":5,"birth":"19 September 1860","birthPlace":"Madison, Texas","death":"25 December 1937","deathPlace":"Fort Worth, Tarrant, Texas","occupation":"","childrenNotes":"","notes":"Married Lilla Smith Westmoreland September 20, 1883 in Madison, Texas.","research":false,"photos":[],"spouse":66,"father":67,"mother":68,"id":65},{"first":"Lilla Smith","last":"Randolph","maiden":"Westmoreland","gender":"female","gen":5,"birth":"21 September 1865","birthPlace":"Madisonville, Madison, Texas","death":"11 January 1957","deathPlace":"Houston, Harris, Texas","occupation":"","childrenNotes":"","notes":"Possible descendant of Jamestown settler Capt. James Davis.","research":false,"photos":[],"spouse":65,"father":null,"mother":null,"id":66},{"first":"Mansel","last":"Randolph","maiden":"","gender":"male","gen":6,"birth":"5 July 1833","birthPlace":"Madison, Texas","death":"1863","deathPlace":"Madison, Texas","occupation":"","childrenNotes":"","notes":"Also known as James \"Mansel\" Randolph. Married Adeline Hollis 1856 in Texas. Burial\nRock Prairie Cemetery Madison, Texas, United States","research":false,"photos":[],"spouse":68,"father":69,"mother":70,"id":67},{"first":"Adeline","last":"Randolph","maiden":"Hollis","gender":"female","gen":6,"birth":"1841","birthPlace":"Montgomery, Texas","death":"1863","deathPlace":"Madison, Texas","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":67,"father":null,"mother":null,"id":68},{"first":"John Clinton","last":"Randolph","maiden":"","gender":"male","gen":7,"birth":"4 October 1793","birthPlace":"Greene, Tennessee","death":"17 February 1852","deathPlace":"Walker, Texas","occupation":"","childrenNotes":"","notes":"Married Frances Cooper September 16, 1824 in Madison, Alabama. Burial \nOakwood Cemetery, Huntsville, Walker, Texas, United States","research":false,"photos":[],"spouse":70,"father":71,"mother":72,"id":69},{"first":"Frances","last":"Randolph","maiden":"Cooper","gender":"female","gen":7,"birth":"30 December 1802","birthPlace":"Texas","death":"10 December 1853","deathPlace":"Walker, Texas","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":69,"father":null,"mother":null,"id":70},{"first":"Nathan","last":"Randolph","maiden":"","gender":"male","gen":8,"birth":"ca. 1765","birthPlace":"Albemarle, Virginia, British Colonial America","death":"ca. 1829","deathPlace":"Madison, Alabama","occupation":"","childrenNotes":"","notes":"Married Hannah Hill 1785 in Charles City, Virginia.\nDeed books: Warren. Deed Books April 1828–October 1833, February 1826–January 1828, April 1820–January 1824, January 1824–May 1826\nDeed books: Warren. Deed Books June 1814–November 1829, March 1814–April 1818, April 1818–August 1820\nDeeds: Greene. Deeds 1785–1797\nLand grants, 1775-1905, 1911","research":false,"photos":[],"spouse":72,"father":73,"mother":74,"id":71},{"first":"Hannah","last":"Randolph","maiden":"Hill","gender":"female","gen":8,"birth":"1769","birthPlace":"Charles City County, Virginia, British Colonial America","death":"1837","deathPlace":"Madison, Alabama","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":71,"father":null,"mother":null,"id":72},{"first":"Thomas","last":"Randolph","maiden":"","gender":"male","gen":9,"birth":"ca. 1740","birthPlace":"Virginia, British Colonial America","death":"1815","deathPlace":"Warren, Tennessee","occupation":"","childrenNotes":"","notes":"Tax Lists, Deeds, and Land Grants are well documented. Recent DNA results show the line of Thomas is definitely descended from Henry Randolph of Albemarle, per Billie Harris. Thomas was probably the oldest of Henry's children, based on the fact that he was the first among the two sons named in Henry's Will. Thomas's birth year is estimated to be between 1740-45. Thomas' genealogy is based in part on (1) \"McMinn County and Its People 1819-1997\", as well as information from Joada Cole, Sherrell Stallings Buchanan, and Veronica Batterson.  Thomas is first shown in 1764 being indebted to Robert and Micajah Clark, and refused payment. He, along with his brother James, sisters and mother, were founding members of the Albemarle Baptist Church in 1773. This is the second record we find of him. In July, 1774, records of the Albemarle Baptist Church shows \"Brother Thomas Randolph to finish Sister Lesbee's house and be paid for same.\" His father and brother John were not members of the Church.  In 1775, he bought 50 acres of land on Ivy Creek, Albemarle County, from Robert and Bethier Logan, which he abandoned when he moved to North Carolina. The land was located on the boundaries with Robert Gentry and Charles Whitlock and the witnesses to the land transaction were John Lewis, Charles Gentry and Charles Goodman. Before Thomas purchased it from Logan, Robert Logan had purchased the land from Michael Woods and the witnesses to that particular deed were Archibald and William Woods, and Andrew Wallace.  Thomas is mentioned in the Will of his dad dated 1778 and, with his brother John, was appointed as an excecutor. After his father passed away, Thomas left Albemarle County and in 1779 was in Washington County, NC (upper Tennessee). In the 1779 Washington County, NC tax list, Capt. Joseph Wilson's District, Thomas Randolph is shown with 200 acres of land, 1 house, 4 acres, cleared land, shillings, stocks, cows, etc. His brother James received property in the county right next to Thomas' as a result of his service in the Revolutionary War. It does not appear Thomas served in the War. (Washington County, Tenn. was formed in 1777 from NC).  The 1781 Tax List for Washington County still shows Thomas and James, as well as William Randols (no doubt Randolph). On October 13, 1783, he was granted 200 acres in Washington County on a branch of the Big Limestone and the grant was entered on April 18, 1779. At the same time, his brother, James, was also granted property on the Big Limestone.  In 1786, Thomas and William Randolph voted in the election. Records show Jun 30, 1788, Thomas Randolph of Washington County, NC, yeoman, to Jonathan Mulkey for 75 lbs NC money - part of this NC grant of 1783 on Big Limestone Creek, bordered by land belonging to Joseph Duncan -- 100 acres. On June 13, 1789, Thomas Randolph sold to Thos. Finley 100 acres for 175 lbs., land on the Big Limestone, \"adj. land surveyed for Thomas Chapman, late Alexander Morrow\" land; thence by other part of land belonging to Thomas Randolph, part of 200 acres grant to sd Randolph by NC granted 23 Oct 17983\". On August 1,, 1789, Joseph Harden sold to Thomas Randolph, planter, both of Greene County, (formerly Washington County) for 80 lbs. 200 acres on Lick Creek granted to Jos. Hardin by pat. NC., Nov 1786. (Greene County was formed in 1783 from Washington County).  Thomas Randolph served on the Grand Jury of Greene County, Tennessee in Nov 1795.  There's a deed dated Feb 9, 1795 in Greene County, Tenn, witnessed by Nathan Randolph from Joseph Hardin to William Brotherton. The land was in the Big Gap Creek area where Thomas Randolph had property. William Brotherton had owned the land Isham Randlph sold to John Crouch.  On April 18, 1803, William Randolph of Greene County sold to Thomas Self- 28 acres on Big Gap Creek, part of the land Thomas \"now lives on\".  The 1805 Greene County, Tenn., Tax List shows Thomas Randolph, Peyton Randolph and Isham Randolph. On August 30, 1806, Isham sold to John couch 276 acres of land on Gap Creek for $50, part of the land where Thomas Randolph \"now lives, conditional with Thomas Randolph\".  On Oct 12, 1807, Thomas Randolph of Greene County sold 124 acres on Gap Creek, being the place where \"Thomas Randolph now resides and beginning at a corner of a 76 acre tract conveyed from Thomas Randolph to Isham Randolph.: (Thomas moved to Warren County, Tennessee).  In Oct 1808, Mary and Joseph Gray to Henry Randolph of Greene County, 30 acres on the South side of Lick Creek. August 1810, Henry Randolph sold his 30 acres on the south side of Lick Creek.  September 5, 1815, Warren County, Tennessee, shows Isham Randolph to Thomas Hopkins of Sullivan County for $700, land on the Cannon Fork of the Collins River, lying between Thomas Randolph and Jake Sanders on the line of Thomas Wilcher's Grant No. 884 issued to Polly Black.  Thomas married Jane Gentry. His known children were: (1) Nathan (2) William (3) Peyton (4 ) Isham (5) Henry (6) Susannah (7) Henry (8) Miriam and Jeremiah who was the first person buried at the Couch/Patterson Cemetery in Greene County, Tennessee.","research":false,"photos":[],"spouse":74,"father":75,"mother":76,"id":73},{"first":"Jane","last":"Randolph","maiden":"Gentry","gender":"female","gen":9,"birth":"1741","birthPlace":"Charles City, Charles City County, Virginia","death":"1814","deathPlace":"Warren, Tennessee","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":73,"father":null,"mother":null,"id":74},{"first":"Henry","last":"Randolph","maiden":"","gender":"male","gen":9,"birth":"1710","birthPlace":"England","death":"August 1778","deathPlace":"Albemarle, Virginia","occupation":"","childrenNotes":"","notes":"8th Great Grandfather. Married Mary Woodson in 1740 in Henrico, Virginia. Possibly an indentured servant born in Norfolk. DNA evidence shows no relation to the \"Turkey Island\" Randolphs.","research":false,"photos":[],"spouse":76,"father":null,"mother":null,"id":75},{"first":"Mary","last":"Randolph","maiden":"Woodson","gender":"female","gen":9,"birth":"1723","birthPlace":"Henrico, Virgina, British Colonial America","death":"1752","deathPlace":"Albermarle, Virginia, British Colonial America","occupation":"","childrenNotes":"","notes":"","research":false,"photos":[],"spouse":75,"father":null,"mother":null,"id":76}];
+const SK='hft_v2';
+let people=[], nextId=77;
+
+function saveData(){try{localStorage.setItem(SK,JSON.stringify({people,nextId}))}catch(e){}}
+function loadData(){
+  try{
+    const raw=localStorage.getItem(SK);
+    if(raw){const d=JSON.parse(raw);if(d.people&&d.people.length){
+      people=d.people;
+      const maxId=Math.max(...people.map(p=>p.id));
+      nextId=Math.max(d.nextId||0,maxId+1);
+      return;
+    }}
+  }catch(e){}
+  people=DEFAULT_PEOPLE.map(p=>({...p}));saveData();
+}
+loadData();
+
+// ── EXPORT / IMPORT / PUBLISH ─────────────────────────────────────────────────
+function downloadUpdatedSite(){
+  const src = document.documentElement.outerHTML;
+  const dataJson = JSON.stringify(people, null, 0);
+
+  // Find the exact start and end markers in the source
+  const START = 'const DEFAULT_PEOPLE=';
+  const END   = ';const SK=';
+  const si = src.indexOf(START);
+  const ei = src.indexOf(END);
+
+  if(si === -1 || ei === -1 || ei <= si){
+    alert('⚠️ Could not locate data section in file.\n\nTry: Export your backup JSON, then come back to Claude and ask for a fresh index.html rebuild.');
+    return;
+  }
+
+  // Splice in the new data
+  let updated = src.substring(0, si) + START + dataJson + src.substring(ei);
+
+  // Also fix nextId
+  updated = updated.replace(/let nextId=\d+/, 'let nextId=' + nextId);
+
+  // Verify it worked
+  const check = updated.indexOf('"id":' + people[people.length-1].id);
+  if(check === -1){
+    alert('⚠️ Data replacement failed — the file may not include all your people.\n\nPlease let me know and I will fix it.');
+    return;
+  }
+
+  const blob = new Blob([updated], {type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'index.html'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+  const sizeKb = Math.round(new TextEncoder().encode(updated).length / 1024);
+  const sizeTxt = sizeKb > 1024 ? (sizeKb/1024).toFixed(1) + ' MB' : sizeKb + ' KB';
+  const warn = sizeKb > 5000
+    ? `\n\n💡 File is ${sizeTxt} because of uploaded photos. For a much smaller file, use image URLs (Imgur, Google Photos) instead of file uploads.`
+    : '';
+  alert(`✅ Downloaded index.html with ${people.length} people (${sizeTxt}).\n\nDrag it to Netlify to go live.${warn}`);
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify({people,nextId},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='family-tree-backup.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.people&&confirm(`Import ${d.people.length} people? This replaces current data.`)){
+        people=d.people;
+        const maxId=Math.max(...people.map(p=>p.id));
+        nextId=Math.max(d.nextId||0,maxId+1);
+        saveData();populateGenFilter();populateFamilyFilter();renderPeople();
+        alert('Imported!');
+      }
+    }catch(e){alert('Invalid backup file.');}
+    e.target.value='';
+  };
+  r.readAsText(file);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+const initials=p=>(p.first[0]||'')+(p.last[0]||'');
+const lifespan=p=>(!p.birth&&!p.death)?'Dates unknown':`${p.birth||'?'} – ${p.death||''}`;
+function genLabel(g){
+  const L={0:'My Generation',1:'Parent',2:'Grandparent',3:'Great-Grandparent',
+    4:'2nd Great-Grandparent',5:'3rd Great-Grandparent',6:'4th Great-Grandparent',
+    7:'5th Great-Grandparent',8:'6th Great-Grandparent',9:'7th Great-Grandparent',
+    10:'8th Great-Grandparent',11:'9th Great-Grandparent',12:'10th Great-Grandparent',
+    13:'11th Great-Grandparent (Research)'};
+  return L[g]!==undefined?L[g]:`Generation ${g}`;
+}
+const findP=id=>people.find(p=>p.id===id);
+const escX=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function getBrianAnc(){
+  const root=people.find(p=>p.gen===0);const set=new Set();
+  function w(id){if(!id||set.has(id))return;set.add(id);const p=findP(id);if(!p)return;w(p.father);w(p.mother);}
+  if(root)w(root.id);return set;
+}
+
+// ── VIEWS ─────────────────────────────────────────────────────────────────────
+function showView(name){
+  document.getElementById('map-popup').style.display='none';
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav.top-nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.bnav-inner button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`view-${name}`).classList.add('active');
+  const idx={people:0,tree:1,map:2}[name];
+  if(idx!==undefined){
+    document.querySelectorAll('nav.top-nav button')[idx]?.classList.add('active');
+    document.getElementById(`bnav-${name}`)?.classList.add('active');
+  }
+  if(name==='tree')renderTree();
+  if(name==='map')initMap();
+}
+
+// ── FAMILY CHIPS ──────────────────────────────────────────────────────────────
+const FLINES=['All','Heffernan','Meagher','Hooley','Shea','Orf','Wolfender','Neathery','Randolph','Nethery'];
+let activeFamily='All';
+function populateFamilyFilter(){
+  const sn=new Set(people.flatMap(p=>[p.last,p.maiden].filter(Boolean)));
+  const show=FLINES.filter(f=>f==='All'||sn.has(f));
+  sn.forEach(s=>{if(s&&!FLINES.includes(s)&&!show.includes(s))show.push(s);});
+  document.getElementById('fchips').innerHTML=[...new Set(show)].map(f=>
+    `<button class="fchip${activeFamily===f?' active':''}" onclick="setFam('${f}')">${f}</button>`
+  ).join('');
+}
+function setFam(n){activeFamily=n;populateFamilyFilter();renderPeople();}
+
+// ── PEOPLE ────────────────────────────────────────────────────────────────────
+function renderPeople(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const gf=document.getElementById('filter-gen').value;
+  const rf=document.getElementById('filter-res').value;
+  let list=people.filter(p=>{
+    const nm=`${p.first} ${p.last} ${p.maiden||''}`.toLowerCase();
+    return(!q||nm.includes(q))&&(!gf||String(p.gen)===gf)&&
+      (!rf||(rf==='main'&&!p.research)||(rf==='research'&&p.research))&&
+      (activeFamily==='All'||p.last===activeFamily||p.maiden===activeFamily);
+  });
+  list.sort((a,b)=>a.gen-b.gen||a.last.localeCompare(b.last));
+  document.getElementById('pcnt').textContent=list.length;
+  const grid=document.getElementById('people-grid');grid.innerHTML='';
+  if(!list.length){grid.innerHTML='<div class="empty"><div class="eicon">🔍</div><p>No people found.</p></div>';return;}
+  list.forEach(p=>{
+    const c=document.createElement('div');c.className=`pcard${p.research?' research':''}`;c.onclick=()=>showDetail(p.id);
+    c.innerHTML=`<div class="pavatar ${p.gender}">${initials(p)}</div>
+      <div class="pname">${p.first} ${p.last}</div>
+      ${p.maiden?`<div class="pdates" style="font-size:.71rem">née ${p.maiden}</div>`:''}
+      <div class="pdates">${lifespan(p)}</div>
+      <span class="ptag${p.research?' r':''}">${genLabel(p.gen)}${p.research?' 🔬':''}</span>`;
+    grid.appendChild(c);
+  });
+}
+function populateGenFilter(){
+  const gens=[...new Set(people.map(p=>p.gen))].sort((a,b)=>a-b);
+  const sel=document.getElementById('filter-gen');
+  sel.innerHTML='<option value="">All generations</option>';
+  gens.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=genLabel(g);sel.appendChild(o);});
+}
+
+// ── DETAIL ────────────────────────────────────────────────────────────────────
+function showDetail(id){
+  const p=findP(id);if(!p)return;
+  const anc=getBrianAnc();
+  const sp=p.spouse?findP(p.spouse):null;
+  const fa=p.father?findP(p.father):null;
+  const mo=p.mother?findP(p.mother):null;
+  const kids=people.filter(c=>c.father===id||c.mother===id);
+  const chip=(per,dl)=>`<span class="rchip${dl?' dl':''}" onclick="showDetail(${per.id})">${per.first} ${per.last}</span>`;
+  const photos=(p.photos||[]).length?`<div class="dsec"><div class="dsec-title">Photos</div>
+    <div class="pgallery">${(p.photos).map(ph=>`<div class="pgitem">
+      <img src="${escX(ph.src)}" alt="${escX(ph.caption||'')}" onclick="openLbox('${escX(ph.src)}','${escX(ph.caption||'')}')"/>
+      ${ph.caption?`<div class="pgcap">${escX(ph.caption)}</div>`:''}</div>`).join('')}</div></div>`:'';
+  const childRow=kids.length?`<div class="rchips">${kids.map(c=>chip(c,anc.has(c.id))).join('')}</div>`:'';
+  document.getElementById('dcard').innerHTML=`
+    <div class="dhdr">
+      <div class="davatar ${p.gender}">${initials(p)}</div>
+      <div><div class="dname">${p.first}${p.maiden?` (${p.maiden})`:''} ${p.last}</div>
+      <div class="dsub">${genLabel(p.gen)}</div></div>
+    </div>
+    ${p.research?'<div class="rbanner">🔬 Research Tree — lineage unconfirmed</div>':''}
+    <div class="dgrid">
+      <div class="dfield"><label>Born</label><p>${p.birth||'—'}${p.birthPlace?`<br><small style="color:var(--muted)">${p.birthPlace}</small>`:''}</p></div>
+      <div class="dfield"><label>Died</label><p>${p.death||(p.birth?'Unknown':'—')}${p.deathPlace?`<br><small style="color:var(--muted)">${p.deathPlace}</small>`:''}</p></div>
+      ${p.burialPlace?`<div class="dfield"><label>Buried</label><p><small style="color:var(--muted)">⚰️ ${p.burialPlace}</small></p></div>`:''}
+      ${p.occupation?`<div class="dfield"><label>Occupation</label><p>${p.occupation}</p></div>`:''}
+      ${sp?`<div class="dfield"><label>Spouse</label><p>${chip(sp,false)}</p></div>`:''}
+      ${fa?`<div class="dfield"><label>Father</label><p>${chip(fa,anc.has(fa.id))}</p></div>`:''}
+      ${mo?`<div class="dfield"><label>Mother</label><p>${chip(mo,anc.has(mo.id))}</p></div>`:''}
+    </div>
+    ${(kids.length||p.childrenNotes)?`<div class="dsec">
+      <div class="dsec-title">Children${kids.length?' <span style="font-size:.67rem;font-weight:400;color:var(--muted)">(★ = Brian\'s direct line)</span>':''}</div>
+      ${childRow}
+      ${p.childrenNotes?`<div style="margin-top:${kids.length?6:0}px;font-size:.83rem;color:var(--muted);line-height:1.65">${p.childrenNotes}</div>`:''}</div>`:''}
+    ${photos}
+    ${p.notes?`<div class="dsec"><div class="dsec-title">Research Notes</div><div class="dnotes">${p.notes}</div></div>`:''}
+    <div class="dact">
+      <button class="btn-back" onclick="showView('people')">← Back</button>
+      <button class="btn-edit" onclick="openEditModal(${p.id})">✏️ Edit</button>
+    </div>`;
+  showView('detail');
+}
+
+// ── LIGHTBOX ──────────────────────────────────────────────────────────────────
+function openLbox(src,cap){document.getElementById('lbox-img').src=src;document.getElementById('lbox-cap').textContent=cap||'';document.getElementById('lbox').classList.add('open');}
+function closeLbox(e){if(!e||e.target===document.getElementById('lbox')||e.target.classList.contains('lbox-x')){document.getElementById('lbox').classList.remove('open');document.getElementById('lbox-img').src='';}}
+
+// ── TREE ──────────────────────────────────────────────────────────────────────
+let treeMode='chart';
+function toggleTreeMode(){
+  treeMode=treeMode==='chart'?'list':'chart';
+  document.getElementById('tmode-btn').textContent=treeMode==='chart'?'📋 List View':'🌳 Chart View';
+  document.getElementById('tree-chart-wrap').style.display=treeMode==='chart'?'':'none';
+  document.getElementById('tree-list').style.display=treeMode==='list'?'':'none';
+  if(treeMode==='list')renderTreeList();else renderTree();
+}
+
+function renderTreeList(){
+  const root=people.find(p=>p.gen===0);if(!root)return;
+  const anc=getBrianAnc();
+  const rf=document.getElementById('tree-res').value;
+  const inTree=new Set();
+  function col(id){if(!id||inTree.has(id))return;const p=findP(id);if(!p)return;
+    if(rf==='main'&&p.research)return;if(rf==='research'&&!p.research)return;
+    inTree.add(id);col(p.father);col(p.mother);}
+  col(root.id);
+  const byGen={};
+  inTree.forEach(id=>{const p=findP(id);if(!p)return;(byGen[p.gen]=byGen[p.gen]||[]).push(p);});
+  const gens=Object.keys(byGen).map(Number).sort((a,b)=>a-b);
+  document.getElementById('tree-list').innerHTML=gens.map(g=>`
+    <div class="alist-gen">
+      <div class="alist-glabel">${genLabel(g)}${g>0?` — ${g} generation${g>1?'s':''} back`:''}</div>
+      ${byGen[g].sort((a,b)=>a.last.localeCompare(b.last)).map(p=>`
+        <div class="alist-p${anc.has(p.id)?' dl':''}" onclick="showDetail(${p.id})">
+          <div class="alist-av ${p.gender}">${initials(p)}</div>
+          <div class="alist-info">
+            <div class="alist-name">${p.first} ${p.last}${p.maiden?` <span style="font-weight:400;font-size:.8em;color:var(--muted)">née ${p.maiden}</span>`:''}</div>
+            <div class="alist-dates">${lifespan(p)}${p.birthPlace?` · ${p.birthPlace}`:''}</div>
+          </div>
+          ${anc.has(p.id)?'<span style="color:var(--gold);font-size:.95rem">★</span>':''}
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function renderTree(){
+  const div=document.getElementById('tree-svg');div.innerHTML='';
+  const root=people.find(p=>p.gen===0);
+  if(!root){div.innerHTML='<p style="padding:16px;color:var(--muted)">No root person.</p>';return;}
+  const rf=document.getElementById('tree-res').value;
+  const anc=getBrianAnc();
+  const NW=182,NH=62,HG=42,VG=10,CW=NW+HG,RH=NH+VG;
+  const inTree=new Set();
+  function col(id){if(!id)return;const p=findP(id);if(!p)return;
+    if(rf==='main'&&p.research)return;if(rf==='research'&&!p.research)return;
+    if(inTree.has(id))return;inTree.add(id);col(p.father);col(p.mother);}
+  col(root.id);
+  if(!inTree.size){div.innerHTML='<p style="padding:16px;color:var(--muted)">No people with this filter.</p>';return;}
+  const depth={};depth[root.id]=0;
+  function sd(id){const p=findP(id);if(!p)return;const d=depth[id]??0;
+    if(p.father&&inTree.has(p.father)&&depth[p.father]===undefined){depth[p.father]=d+1;sd(p.father);}
+    if(p.mother&&inTree.has(p.mother)&&depth[p.mother]===undefined){depth[p.mother]=d+1;sd(p.mother);}}
+  sd(root.id);
+  const lc={};
+  function cl(id){if(!id||!inTree.has(id))return 0;if(lc[id]!==undefined)return lc[id];
+    const p=findP(id);const fl=(p.father&&inTree.has(p.father))?cl(p.father):0;
+    const ml=(p.mother&&inTree.has(p.mother))?cl(p.mother):0;return lc[id]=(fl+ml)||1;}
+  const tl=cl(root.id);
+  const pos={};
+  function lay(id,tl0){if(!id||!inTree.has(id))return;const p=findP(id),sp=lc[id];
+    pos[id]={x:(depth[id]??0)*CW,y:(tl0+(sp-1)/2)*RH};
+    const fl=(p.father&&inTree.has(p.father))?lc[p.father]:0;
+    lay(p.father,tl0);lay(p.mother,tl0+fl);}
+  lay(root.id,0);
+  const md=Math.max(...Object.values(depth));
+  const W=(md+1)*CW+HG+8,H=tl*RH+VG+8;
+  let lines='',nodes='';
+  inTree.forEach(id=>{
+    const p=findP(id),{x,y}=pos[id]||{x:0,y:0};
+    const cx=x+NW,cy=y+NH/2;
+    const hf=p.father&&inTree.has(p.father)&&pos[p.father];
+    const hm=p.mother&&inTree.has(p.mother)&&pos[p.mother];
+    if(hf||hm){const mx=x+NW+HG/2;
+      if(hf&&hm){const fy=pos[p.father].y+NH/2,my=pos[p.mother].y+NH/2;
+        lines+=`<line x1="${cx}" y1="${cy}" x2="${mx}" y2="${cy}"/>
+          <line x1="${mx}" y1="${fy}" x2="${mx}" y2="${my}"/>
+          <line x1="${mx}" y1="${fy}" x2="${pos[p.father].x}" y2="${fy}"/>
+          <line x1="${mx}" y1="${my}" x2="${pos[p.mother].x}" y2="${my}"/>`;
+      }else{const pp=hf?pos[p.father]:pos[p.mother],py=pp.y+NH/2;
+        lines+=`<line x1="${cx}" y1="${cy}" x2="${pp.x}" y2="${py}"/>`;}}
+    const isR=(id===root.id),isDL=anc.has(id);
+    const fill=p.research?'#f0faf5':isR?'#fff8ee':'#fff';
+    const str=isR?'#5a3e2b':isDL?'#c49a1a':p.research?'#7abfa0':'#ddd0c0';
+    const sw=isR?3:isDL?2:1.5;
+    const nm=escX(`${p.first} ${p.last}`);
+    const mn=p.maiden?escX(`née ${p.maiden}`):'';
+    const by=(p.birth||'').match(/\d{4}/)?.[0]||'';
+    const dy=(p.death||'').match(/\d{4}/)?.[0]||(p.birth?'—':'');
+    const dt=(by||dy)?escX(`${by}–${dy}`):'';
+    const star=isDL&&!isR?'★ ':'';
+    let ty=19,txt=`<text x="8" y="${ty}" font-size="11.5" font-weight="700" fill="#2c1a0e">${star}${nm}</text>`;
+    if(mn){ty+=13;txt+=`<text x="8" y="${ty}" font-size="9" fill="#8b6e8b">${mn}</text>`;}
+    if(dt){ty+=12;txt+=`<text x="8" y="${ty}" font-size="10" fill="#7a6452">${dt}</text>`;}
+    nodes+=`<g transform="translate(${x},${y})" onclick="showDetail(${id})" style="cursor:pointer">
+      <rect width="${NW}" height="${NH}" rx="7" fill="${fill}" stroke="${str}" stroke-width="${sw}"/>
+      ${txt}</g>`;
+  });
+  div.innerHTML=`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg"
+    style="font-family:'Segoe UI',system-ui,sans-serif;display:block;padding:6px;overflow:visible">
+    <g stroke="#c8b89a" stroke-width="1.5" fill="none">${lines}</g>${nodes}</svg>`;
+}
+
+// ── MAP ───────────────────────────────────────────────────────────────────────
+// Pre-seeded coordinates for all known birthplaces in this tree
+const SEED_COORDS = {"cashel, county tipperary, ireland":[52.517,-7.888],"carrick-on-suir, county tipperary, ireland":[52.35,-7.42],"county tipperary, ireland":[52.47,-7.97],"killenaule, county tipperary, ireland":[52.55,-7.73],"thurles, county tipperary, ireland":[52.68,-7.80],"ireland":[53.41,-8.24],"county cork, ireland":[51.90,-8.47],"cork, ireland":[51.90,-8.47],"cambridge, middlesex, massachusetts":[42.37,-71.11],"cambridge, massachusetts":[42.37,-71.11],"somerville, middlesex, massachusetts":[42.39,-71.10],"massachusetts":[42.40,-71.38],"boston, massachusetts":[42.36,-71.06],"canso, guysborough, nova scotia, canada":[45.33,-61.00],"cape canso, guysborough, nova scotia, canada":[45.33,-61.00],"nova scotia, canada":[44.68,-63.74],"connecticut":[41.60,-72.70],"fort worth, tarrant, texas":[32.75,-97.33],"fort worth, tarrant county, texas":[32.75,-97.33],"texas":[31.00,-100.00],"sherman, grayson, texas":[33.63,-96.61],"madison, texas":[30.95,-95.93],"madisonville, madison, texas":[30.95,-95.93],"montgomery, texas":[30.39,-95.70],"quanah, hardeman, tarrant, texas":[34.30,-99.73],"quanah, hardeman, texas":[34.30,-99.73],"josephville, saint charles, missouri":[38.87,-90.70],"cuivre township, saint charles, missouri":[38.87,-90.95],"springfield, greene, missouri":[37.21,-93.29],"st. louis, missouri":[38.63,-90.20],"missouri":[38.57,-92.60],"germany":[51.17,10.45],"weimar, sachsen-weimar-eisenach, germany":[50.98,11.33],"bermbach, landkreis schmalkalden-meiningen, thüringen, germany":[50.55,10.15],"bermbach, hesse, germany":[50.20,8.15],"kranlucken, schleid, eisenach, saxe-weimar-eisenach, germany":[50.99,10.12],"kassel, hesse, germany":[51.32,9.50],"prussia":[52.52,13.40],"switzerland":[46.82,8.23],"perthshire, scotland":[56.50,-3.80],"scotland":[56.49,-4.20],"england":[52.48,-1.90],"mecklenburg, virginia":[36.68,-78.51],"colonial virginia / pennsylvania":[37.50,-79.00],"virginia, british colonial america":[37.43,-78.66],"albemarle, virginia, british colonial america":[38.02,-78.50],"charles city county, virginia, british colonial america":[37.35,-77.10],"charles city, charles city county, virginia":[37.35,-77.10],"henrico, virgina, british colonial america":[37.55,-77.40],"henrico, virginia, british colonial america":[37.55,-77.40],"burke, north carolina":[35.75,-81.70],"north carolina":[35.63,-79.80],"clinton, hickman, kentucky":[36.67,-88.99],"cumberland, kentucky":[36.98,-84.53],"kentucky":[37.67,-84.87],"greene, tennessee":[36.17,-82.83]};
+
+// ── MAP (pure SVG, no external library) ──────────────────────────────────────
+// Equirectangular projection matching Wikipedia world map image (2560×1280 px)
+// x = (lon + 180) / 360 * 2560
+// y = (90 - lat) / 180 * 1280
+const GCK='hft_gc3';
+function getGC(){
+  try{const s=JSON.parse(localStorage.getItem(GCK)||'{}');return Object.assign({},SEED_COORDS,s);}
+  catch(e){return Object.assign({},SEED_COORDS);}
+}
+function setGC(extra){
+  const t={};Object.entries(extra).forEach(([k,v])=>{if(!SEED_COORDS[k])t[k]=v;});
+  try{localStorage.setItem(GCK,JSON.stringify(t));}catch(e){}
+}
+function latLonToXY(lat,lon){
+  return [(lon+180)/360*2560, (90-lat)/180*1280];
+}
+
+function initMap(){
+  const st=document.getElementById('gcstatus');
+  const svg=document.getElementById('dot-layer');
+  svg.innerHTML='';
+  const cache=getGC();
+  const anc=getBrianAnc();
+  const todo=people.filter(p=>p.birthPlace&&p.birthPlace.trim()&&!/unknown/i.test(p.birthPlace));
+
+  // Group people by location key so overlapping dots stack nicely
+  const groups={};
+  todo.forEach(p=>{
+    const k=p.birthPlace.trim().toLowerCase();
+    const coord=cache[k];
+    if(coord){
+      if(!groups[k])groups[k]={coord,people:[]};
+      groups[k].people.push(p);
+    }
+  });
+
+  let placed=0;
+  Object.values(groups).forEach(g=>{
+    const [lat,lon]=g.coord;
+    const [x,y]=latLonToXY(lat,lon);
+    // Color: gold if any person in group is a direct ancestor, green if research, else brown
+    const hasAnc=g.people.some(p=>anc.has(p.id));
+    const hasRes=g.people.some(p=>p.research);
+    const color=hasAnc?'#c49a1a':hasRes?'#3a6b52':'#5a3e2b';
+    const count=g.people.length;
+    const r=count>1?9:7;
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',x.toFixed(1));
+    circle.setAttribute('cy',y.toFixed(1));
+    circle.setAttribute('r',r);
+    circle.setAttribute('fill',color);
+    circle.setAttribute('fill-opacity','0.88');
+    circle.setAttribute('stroke','#fff');
+    circle.setAttribute('stroke-width','1.5');
+    circle.title=g.people.map(p=>p.first+' '+p.last).join(', ');
+    circle.addEventListener('click',e=>{
+      e.stopPropagation();
+      showMapPopup(g.people,g.people[0].birthPlace,e);
+    });
+    svg.appendChild(circle);
+    // Count badge for multiple people at same location
+    if(count>1){
+      const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x',x.toFixed(1));txt.setAttribute('y',(y+4).toFixed(1));
+      txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size','9');
+      txt.setAttribute('font-weight','bold');txt.setAttribute('fill','#fff');
+      txt.setAttribute('pointer-events','none');
+      txt.textContent=count;svg.appendChild(txt);
+    }
+    placed++;
+  });
+
+  const missed=todo.length-todo.filter(p=>cache[p.birthPlace.trim().toLowerCase()]).length;
+  st.textContent=`${placed} locations plotted · ${todo.length} people with birthplaces${missed?` · ${missed} locations unknown`:''}`;
+
+  // Async geocode any unknowns via Nominatim
+  const unknowns=todo.filter(p=>!cache[p.birthPlace.trim().toLowerCase()]);
+  if(unknowns.length)geocodeUnknowns(unknowns,cache,anc,svg,st);
+}
+
+async function geocodeUnknowns(unknowns,cache,anc,svg,st){
+  const extra={};
+  for(let i=0;i<unknowns.length;i++){
+    const p=unknowns[i];
+    const k=p.birthPlace.trim().toLowerCase();
+    if(cache[k])continue;
+    await new Promise(r=>setTimeout(r,1200));
+    try{
+      const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(p.birthPlace)}&format=json&limit=1&accept-language=en`);
+      if(res.ok){const d=await res.json();
+        if(d&&d[0]){const lat=parseFloat(d[0].lat),lon=parseFloat(d[0].lon);
+          extra[k]=[lat,lon];cache[k]=[lat,lon];
+          const [x,y]=latLonToXY(lat,lon);
+          const color=p.research?'#3a6b52':anc.has(p.id)?'#c49a1a':'#5a3e2b';
+          const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+          c.setAttribute('cx',x.toFixed(1));c.setAttribute('cy',y.toFixed(1));
+          c.setAttribute('r','7');c.setAttribute('fill',color);c.setAttribute('fill-opacity','0.88');
+          c.setAttribute('stroke','#fff');c.setAttribute('stroke-width','1.5');
+          c.addEventListener('click',e=>{e.stopPropagation();showMapPopup([p],p.birthPlace,e);});
+          svg.appendChild(c);
+        }
+      }
+    }catch(e){}
+    st.textContent=`Geocoding: ${i+1}/${unknowns.length} done…`;
+  }
+  if(Object.keys(extra).length)setGC(extra);
+  st.textContent=`Done — ${svg.querySelectorAll('circle').length} locations on map.`;
+}
+
+function showMapPopup(persons,loc,evt){
+  const popup=document.getElementById('map-popup');
+  const p=persons[0];
+  document.getElementById('mp-name').textContent=persons.length>1
+    ? persons.map(x=>x.first+' '+x.last).join(' · ')
+    : p.first+' '+p.last+(p.maiden?' (née '+p.maiden+')':'');
+  document.getElementById('mp-loc').textContent=loc||'';
+  document.getElementById('mp-dates').textContent=
+    [p.birth?'b. '+p.birth:'',p.death?'d. '+p.death:'',p.burialPlace?'⚰️ '+p.burialPlace:''].filter(Boolean).join(' · ');
+  const btn=document.getElementById('mp-view');
+  btn.onclick=()=>{popup.style.display='none';showDetail(p.id);};
+  btn.style.display=persons.length>1?'none':'inline-block';
+  popup.style.display='block';
+  // Position popup near the click but keep it on screen
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const pw=250,ph=120;
+  let left=evt.clientX+14,top=evt.clientY-10;
+  if(left+pw>vw-10)left=evt.clientX-pw-14;
+  if(top+ph>vh-10)top=vh-ph-10;
+  popup.style.left=left+'px';popup.style.top=top+'px';
+}
+// Close popup when clicking outside of it
+document.addEventListener('click',e=>{
+  const popup=document.getElementById('map-popup');
+  if(popup&&!popup.contains(e.target))popup.style.display='none';
+});
+
+// ── PHOTOS ────────────────────────────────────────────────────────────────────
+let temps=[];
+function renderThumbs(){
+  document.getElementById('pthumbs').innerHTML=temps.map((ph,i)=>
+    `<div class="pthumb"><img src="${escX(ph.src)}" title="${escX(ph.caption||'')}"/>
+     <button onclick="rmPhoto(${i})">✕</button></div>`).join('');
+}
+function rmPhoto(i){temps.splice(i,1);renderThumbs();}
+async function pastePhoto(){
+  try{const items=await navigator.clipboard.read();let found=false;
+    for(const item of items){const t=item.types.find(t=>t.startsWith('image/'));
+      if(t){const blob=await item.getType(t);
+        compressAndAdd(blob,document.getElementById('f-cap').value.trim());
+        document.getElementById('f-cap').value='';found=true;break;}}
+    if(!found)alert('No image in clipboard.\nRight-click an image → "Copy Image", then try again.');
+  }catch(e){alert('Clipboard access blocked. Allow it in your browser or use Upload.');}
+}
+function uploadPhoto(e){
+  const file=e.target.files[0];if(!file)return;
+  const cap=document.getElementById('f-cap').value.trim();
+  compressAndAdd(file,cap);
+  document.getElementById('f-cap').value='';e.target.value='';
+}
+function compressAndAdd(blob,caption){
+  // Compress to max 1000px wide, JPEG 72%
+  const img=new Image();const url=URL.createObjectURL(blob);
+  img.onload=()=>{
+    const MAX=1000;let w=img.width,h=img.height;
+    if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    const src=canvas.toDataURL('image/jpeg',0.72);
+    temps.push({src,caption});renderThumbs();URL.revokeObjectURL(url);
+  };
+  img.src=url;
+}
+function addUrl(){
+  const url=document.getElementById('f-url').value.trim();if(!url){alert('Paste a URL first.');return;}
+  const cap=document.getElementById('f-cap').value.trim();
+  temps.push({src:url,caption:cap});
+  document.getElementById('f-url').value='';document.getElementById('f-cap').value='';
+  renderThumbs();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function populateRels(excl=null){
+  ['f-spouse','f-father','f-mother'].forEach(sid=>{
+    const sel=document.getElementById(sid),cur=sel.value;
+    sel.innerHTML=`<option value="">— ${sid==='f-spouse'?'None':'Unknown'} —</option>`;
+    [...people].filter(p=>p.id!==excl).sort((a,b)=>a.gen-b.gen||a.last.localeCompare(b.last)).forEach(p=>{
+      const o=document.createElement('option');o.value=p.id;
+      o.textContent=`${p.first} ${p.last} (${genLabel(p.gen)})`;
+      if(String(p.id)===cur)o.selected=true;sel.appendChild(o);});
+  });
+}
+function showLinkedKids(pid){
+  const kids=people.filter(c=>c.father===pid||c.mother===pid);
+  const el=document.getElementById('lc-display');
+  if(!kids.length){el.style.display='none';return;}
+  const anc=getBrianAnc();el.style.display='';
+  document.getElementById('lc-chips').innerHTML=kids.map(c=>
+    `<span class="rchip${anc.has(c.id)?' dl':''}">${c.first} ${c.last}${anc.has(c.id)?' ★':''}</span>`).join('');
+}
+let editId=null;
+function openAddModal(){
+  editId=null;temps=[];
+  document.getElementById('modal-title').textContent='Add Person';
+  document.getElementById('btn-del').style.display='none';
+  ['first','last','maiden','birth','birthplace','death','deathplace','burial','occ','cnotes','notes'].forEach(f=>document.getElementById(`f-${f}`).value='');
+  document.getElementById('f-gender').value='male';document.getElementById('f-gen').value='1';
+  document.getElementById('f-research').checked=false;
+  document.getElementById('lc-display').style.display='none';
+  renderThumbs();populateRels();
+  document.getElementById('f-spouse').value='';document.getElementById('f-father').value='';document.getElementById('f-mother').value='';
+  document.getElementById('moverlay').classList.add('open');document.getElementById('moverlay').scrollTop=0;
+}
+function openEditModal(id){
+  const p=findP(id);if(!p)return;
+  editId=id;temps=[...(p.photos||[])];
+  document.getElementById('modal-title').textContent='Edit Person';
+  document.getElementById('btn-del').style.display='inline-flex';
+  document.getElementById('f-first').value=p.first;document.getElementById('f-last').value=p.last;
+  document.getElementById('f-maiden').value=p.maiden||'';document.getElementById('f-gender').value=p.gender;
+  document.getElementById('f-gen').value=p.gen;document.getElementById('f-birth').value=p.birth||'';
+  document.getElementById('f-birthplace').value=p.birthPlace||'';document.getElementById('f-death').value=p.death||'';
+  document.getElementById('f-deathplace').value=p.deathPlace||'';document.getElementById('f-burial').value=p.burialPlace||'';document.getElementById('f-occ').value=p.occupation||'';
+  document.getElementById('f-cnotes').value=p.childrenNotes||'';document.getElementById('f-notes').value=p.notes||'';
+  document.getElementById('f-research').checked=p.research||false;
+  renderThumbs();showLinkedKids(id);populateRels(id);
+  document.getElementById('f-spouse').value=p.spouse||'';document.getElementById('f-father').value=p.father||'';document.getElementById('f-mother').value=p.mother||'';
+  document.getElementById('moverlay').classList.add('open');document.getElementById('moverlay').scrollTop=0;
+}
+function closeModal(){document.getElementById('moverlay').classList.remove('open');}
+function closeModalOut(e){if(e.target===document.getElementById('moverlay'))closeModal();}
+
+function savePerson(){
+  const first=document.getElementById('f-first').value.trim(),last=document.getElementById('f-last').value.trim();
+  if(!first||!last){alert('First and last name required.');return;}
+  const d={first,last,maiden:document.getElementById('f-maiden').value.trim(),
+    gender:document.getElementById('f-gender').value,gen:parseInt(document.getElementById('f-gen').value),
+    birth:document.getElementById('f-birth').value.trim(),birthPlace:document.getElementById('f-birthplace').value.trim(),
+    death:document.getElementById('f-death').value.trim(),deathPlace:document.getElementById('f-deathplace').value.trim(),
+    burialPlace:document.getElementById('f-burial').value.trim(),
+    occupation:document.getElementById('f-occ').value.trim(),childrenNotes:document.getElementById('f-cnotes').value.trim(),
+    notes:document.getElementById('f-notes').value.trim(),research:document.getElementById('f-research').checked,
+    photos:[...temps],
+    spouse:parseInt(document.getElementById('f-spouse').value)||null,
+    father:parseInt(document.getElementById('f-father').value)||null,
+    mother:parseInt(document.getElementById('f-mother').value)||null};
+  if(editId){const i=people.findIndex(p=>p.id===editId);people[i]={...people[i],...d};}
+  else{d.id=nextId++;people.push(d);}
+  saveData();closeModal();populateGenFilter();populateFamilyFilter();renderPeople();
+  if(editId)showDetail(editId);
+}
+function deletePerson(){
+  if(!confirm('Delete this person?'))return;
+  people=people.filter(p=>p.id!==editId);
+  people.forEach(p=>{if(p.spouse===editId)p.spouse=null;if(p.father===editId)p.father=null;if(p.mother===editId)p.mother=null;});
+  saveData();closeModal();populateGenFilter();populateFamilyFilter();renderPeople();showView('people');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+populateGenFilter();populateFamilyFilter();renderPeople();
+</script>
+</body>
+</html>
